@@ -1,13 +1,35 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar'
+import React, {useEffect} from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import * as Updates from 'expo-updates'
+import { 
+  DarkTheme,
+  DefaultTheme, 
+  NavigationContainer,
+} from '@react-navigation/native'
+import MainStack from './navigation/MainStack'
+import ListContextProvider from './contexts/listContexts'
 
 export default function App() {
+  //verifica se tem atualizações no codigo do aplicativo
+  useEffect(()=>{
+    async function updateApp(){
+      const {isAvailable} = Updates.checkForUpdateAsync()
+      if(isAvailable){
+        await Updates.fetchUpdateAsync()
+        await Updates.reloadAsync()
+      }
+    }
+    updateApp()
+  },[])
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <ListContextProvider>
+      <NavigationContainer >       
+          <MainStack/>
+          <StatusBar style="light" />          
+      </NavigationContainer>
+    </ListContextProvider>
   );
 }
 
