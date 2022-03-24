@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import * as Updates from 'expo-updates'
 import { 
@@ -11,6 +11,7 @@ import MainStack from './navigation/MainStack'
 import ListContextProvider from './contexts/listContexts'
 
 export default function App() {
+  
   //verifica se tem atualizações no codigo do aplicativo
   useEffect(()=>{
     async function updateApp(){
@@ -22,6 +23,8 @@ export default function App() {
     }
     updateApp()
   },[])
+ 
+
 
   return (
     <ListContextProvider>
