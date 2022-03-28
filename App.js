@@ -3,8 +3,6 @@ import React, {useEffect, useState} from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import * as Updates from 'expo-updates'
 import { 
-  DarkTheme,
-  DefaultTheme, 
   NavigationContainer,
 } from '@react-navigation/native'
 import MainStack from './navigation/MainStack'
@@ -30,7 +28,7 @@ export default function App() {
     <ListContextProvider>
       <NavigationContainer >       
           <MainStack/>
-          <StatusBar style="light" />          
+          <StatusBar style="auto" />          
       </NavigationContainer>
     </ListContextProvider>
   );

@@ -18,6 +18,7 @@ export default props => {
         onChangeText={props.onChangeText}
         value={props.value}   
         ref = {inputRef}
+        placeholder={props.placeholder?props.placeholder:""}
         secureTextEntry={props.secureTextEntry}
       />
     </View>

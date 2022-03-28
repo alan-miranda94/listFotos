@@ -12,18 +12,19 @@ import {Button,ProgressBar, Colors } from 'react-native-paper'
 import {claroLogo, nokiaLogo} from '../assets/imgBase64'
 import loadding from '../loadding.json'
 import Lottie from '../components/Lottie'
-import * as MediaLibrary from 'expo-media-library'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default props => {
     const navigation = useNavigation()
-    const [image, setImage] = useState(null)
+    const [listFotos, setListFotos] = useState(null)
     const {state, dispatch} = useContext(ListContext)
     const [excel, setExcel] = useState(null)
     const [progress, setProgress] = useState(false)
-    const [name, setName] = useState('EX:NOME-DO-SITE')
+    const [name, setName] = useState(null)
     const [status, setStatus] = useState(false)
     const workbook = new ExcelJS.Workbook()
     const now = new Date();
+    const route = useRoute()
     workbook.creator = 'APP FEMATEL'
     workbook.created = now
     const worksheet = workbook.addWorksheet('RELÁTORIO FOTOGRÁFICO', {views: [{showGridLines: false}]})
@@ -31,11 +32,20 @@ export default props => {
     useEffect(()=>{
       //console.log('GERADOR EXCEL',state.atualLista[0].b64)
       //setImage(state.atualLista[0].b64)
+      // getAllImage(state[route.params.list])
+      setListFotos(state[route.params.list])
+
     },[])
 
+    useEffect(()=>{    
+      navigation.setOptions({ title:'Gerador Excel'})
+    }, [])
+
     const getAllImage = (list)=>{
+      
       let newList = list.filter((l)=> l.b64&&true)
-      return newList
+     
+      setListFotos(newList)
     }
 
     const downloadExcel = useCallback(async (fileUri) => {
@@ -53,6 +63,49 @@ export default props => {
       }
     }, [])
 
+    const getData = async (name='@salvos') => {
+      try {
+        const jsonValue = await AsyncStorage.getItem(name)
+        const endValue = JSON.parse(jsonValue)
+        return jsonValue != null ?endValue: null;
+      } catch(e) {
+        // error reading value
+      }
+    }
+
+
+    const finalizeSave = async () =>{      
+      try{
+        let newListSalvos = []
+        const salvosList = await getData()
+        const nameFake ='R-'+ Math.floor(Math.random()*10000)
+        const jvalue = JSON.stringify(state.atualLista)
+        const endName = name?name:nameFake
+        
+        //salva a lista completa com as fotos e os caminhos 
+        await AsyncStorage.setItem(`@${endName}-Editavel`,jvalue)
+        if(excel){
+          //salva o caminho do arquivo excel
+          await AsyncStorage.setItem(`@${endName}-Excel`,excel)
+        }
+        newListSalvos.push(endName)
+
+        if(salvosList){
+          newListSalvos = newListSalvos.concat(salvosList)          
+        }
+        
+        await AsyncStorage.setItem("@salvos", JSON.stringify(newListSalvos))
+        dispatch({
+          type: 'zerar'
+        })
+
+        navigation.navigate('Home')
+      } catch(e){
+        console.log(e)
+        alert('ERRO AO SALVAR')
+      }
+     
+    }
 
     const saveExcel = (nameDoc)=>{
       return new Promise (async (resolve, reject) => {
@@ -72,13 +125,13 @@ export default props => {
 
             setExcel(fileUri)
             alert('ARQUIVO GERADO COM SUCESSO')
-            
             resolve(true)
           })
         })
       })
     }
 
+    //adiciona as logos e o nome do site no inicio
     const creatHeard = (nameSite)=>{
       //CARREGANDO IMAGENS DA LOGO  E ADICIONANDO NA PLANILHA
       setStatus("ADICIONANDO LOGOS DA NOKIA E CLARO")
@@ -102,6 +155,7 @@ export default props => {
       
     }
 
+    //adiciona todas as fotos e suas bordas 
     const addFotos = async (lista) =>{
       let controle = 1
       let linhas = {
@@ -123,12 +177,14 @@ export default props => {
           console.log(error)
         }
         //COLOCANDO BORDAS DA FOTO
-        worksheet.getCell(linhas[controle][0] + number[0]).border={
+        let fotoContainer = worksheet.getCell(linhas[controle][0] + number[0])
+        fotoContainer.border={
           top: {style:'medium', color: {argb:'000000'}},
           left: {style:'medium', color: {argb:'000000'}},
           bottom: {style:'medium', color: {argb:'000000'}},
           right: {style:'medium', color: {argb:'000000'}}
         }
+
         
         
         //ADICIONAR LEGENDA  e COLOCANDO BORDAS DA LEGENDA      
@@ -145,17 +201,24 @@ export default props => {
       
         
        
-       
-        //ADDICIONANDO FOTOS 
-        let foto = workbook.addImage({
+       if(element.b64){
+         //ADDICIONANDO FOTOS 
+         let foto = workbook.addImage({
           base64: element.b64,
           extension: 'jpg',
         })
+        //console.log('GERADOR',element.width)
         worksheet.addImage(foto, {
           tl: { col: imgCol, row: imgRow },
-          ext: { width: 242, height: 238 }
+          ext: { height: 238 , width:241},
+          editAs: 'oneCell'
         } )//(`${linhas[controle][0] + number[0]}:${linhas[controle][1] + number[1]}`))
 
+       }else{
+         fotoContainer.value = 'N/A'
+         fotoContainer.alignment = { vertical: 'middle', horizontal: 'center',wrapText: true }
+       }
+       
        
         if (controle === 3){
           imgRow += 17
@@ -172,12 +235,14 @@ export default props => {
     }
 
     const generateExcel = async ()=>{   
+      if(!name) return(alert('DIGITE O NOME DO SITE'))
+      if(listFotos.length === 0) return(alert("NÃO TEM FOTOS NO RELATÓRIO"))
+
       setProgress(true)   
       //pega apenas as imagens da lista
-      
-      const itens = getAllImage(state.atualLista)
+      //const itens = getAllImage(state.atualLista)
       creatHeard(name)
-      addFotos(itens)
+      addFotos(listFotos)
       //salva arquivo como excel
       saveExcel(name).then((e)=>{
         setProgress(false) 
@@ -201,7 +266,7 @@ export default props => {
 
     return(
         <View style={styles.container}>            
-            <Text style={{fontSize:22, fontWeight:'bold'}}>{name.toUpperCase() + '.xlsx'}</Text>
+            <Text style={{fontSize:22, fontWeight:'bold'}}>{name?name.toUpperCase() + '.xlsx':''}</Text>
             {progress?
               <View style={styles.containerImage}>
                 <Lottie source ={loadding} />
@@ -220,6 +285,7 @@ export default props => {
             <MyTextInput 
               title={'NOME DO SITE'}
               value={name}
+              placeholder = 'EX:NOME-DO-SITE'
               onChangeText = {(t)=> setName(t)}
             />
             
@@ -231,7 +297,19 @@ export default props => {
             >
               Gerar Relatorio
             </Button>
-            <Button 
+            {false&&
+              <Button  
+                disabled= {!excel}
+                style={[styles.button]} 
+                onPress={shareExcel}             
+                mode='contained' 
+                color= "#2196f3"
+              >
+                Baixar
+              </Button>
+            }
+            <Button  
+              disabled= {!excel}
               style={[styles.button]} 
               onPress={shareExcel}             
               mode='contained' 
@@ -242,7 +320,7 @@ export default props => {
             {true&&
               <Button 
                 style={styles.button} 
-                onPress = {()=>navigation.navigate('Home')}
+                onPress = {finalizeSave}
                 mode='contained' 
                 color= "#2196f3"
               >

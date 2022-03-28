@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import Home from '../screens/Home'
 import NewList from '../screens/NewList'
 import GeradorExcel from '../screens/GeradorExcel'
+import Galeria from '../screens/Galeria'
 
 const Stack = createNativeStackNavigator()
 
@@ -11,13 +12,13 @@ export default () => (
   <Stack.Navigator 
     initialRouteName=  'Home'
     screenOptions={{
-        headerShown: false
+        headerShown: true
     }}>
-      <Stack.Screen name = 'Home' component = {Home}/> 
-      <Stack.Screen name = 'NewList' component = {NewList} options ={{headerShown:true}}/>     
-     { 
-      <Stack.Screen name = 'GeradorExcel' component = {GeradorExcel} options ={{headerShown:true}}/>
-     }
+      <Stack.Screen name = 'Home' component = {Home} options ={{headerShown:false}}/> 
+      <Stack.Screen name = 'NewList' component = {NewList} />     
+      <Stack.Screen name = 'GeradorExcel' component = {GeradorExcel} />
+      <Stack.Screen name = 'Galeria' component = {Galeria} />
+     
 
       
   </Stack.Navigator>

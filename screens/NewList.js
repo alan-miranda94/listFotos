@@ -1,7 +1,7 @@
 import  React, {useEffect, useState, useContext} from 'react'
 import { Text, SafeAreaView, StyleSheet, FlatList ,View, TouchableOpacity} from 'react-native'
 import Item from '../components/Item'
-import {useNavigation} from '@react-navigation/native'
+import {useNavigation, useRoute} from '@react-navigation/native'
 import {ListContext} from '../contexts/listContexts'
 import { Ionicons } from '@expo/vector-icons'
 //import * as Sharing from 'expo-sharing'
@@ -11,10 +11,10 @@ import {Button,ProgressBar, Colors } from 'react-native-paper'
 
 export default props => {
   //const { otherParam , title} = props.route.params  
-  const [name, setName] = useState('ENTRADA DO SITE')
+  const [name, setName] = useState('')
   const [nameEstacao, setNameEstacao] = useState('PEIPS05-RMD02')
   const [hasPermission, setHasPermission] = useState(null)
-  const [otherParam, setOtherParam] = useState(null)
+  const [params, setParams] = useState(null)
   const [title, setTitle] = useState(null)
   //pega a lista pelo reducer 
   const {state, dispatch} = useContext(ListContext)
@@ -22,26 +22,39 @@ export default props => {
   const [add, setAdd] = useState(false)
   //const {dispatch} = useContext(ListContext)
   const navigation = useNavigation()
+  const route = useRoute()
 
+  //pega permisão do usuario par atirar foto
   useEffect(() => {    
+
     (async () => {
       const {status} = await  ImagePicker.requestMediaLibraryPermissionsAsync()      
       setHasPermission(status === 'granted');
-    })()
+    })()  
+
   }, [])
 
   const addItemList = (item) => {
     dispatch({
       type: 'novoItem',
-      payload: {id:Math.floor(Math.random()*1000), title:name}
+      payload:{
+        list:route.params.type, 
+        item:{
+          id:Math.floor(Math.random()*1000), 
+          title:name
+        }
+      }
     })
   } 
+
   useEffect(()=>{
-    setLista(state.atualLista)
+    //console.log('NL',state[route.params.listName])
+    setLista(state[route.params.listName])
   },[state])
  
+  //muda o titulo do header
   useEffect(()=>{    
-    props.navigation.setOptions({ title:state.title,
+    props.navigation.setOptions({ title:route.params.title,
         headerRight: () => (
         //ao clicar no botão muda de tela e gera relatorio
         <View style={{flexDirection:'row'}}>
@@ -57,16 +70,17 @@ export default props => {
   }, [])
   
   const pressGerar = ()=>{
-    navigation.navigate('GeradorExcel')
+    navigation.navigate('GeradorExcel',{list:route.params.listName})
   }
  
   return (
     <View style={styles.container}>     
-      { state.title === 'EM BRANCO'&&
+      { route.params.title === 'EM BRANCO'&&
       <View style={styles.inputContatiner}>
         <MyTextInput 
           title={'LEGENDA DA FOTO'}
           value={name}
+          placeholder = 'EX:ENTRADA DO SITE'
           onChangeText = {(t)=> setName(t)}
         />
         <View style={{flexDirection:'row'}}>
@@ -83,11 +97,12 @@ export default props => {
       }  
       <FlatList
         data={lista}
-        contentContainerStyle={{ paddingVertical: 10 ,}}
+        initialNumToRender = {10}
+        contentContainerStyle={{ paddingVertical: 10 ,paddingBottom:30}}
         showsVerticalScrollIndicator={false}
-        ListFooterComponent={()=><Text style={styles.logo}>FEMATEL</Text>}
+        ListFooterComponent={()=><Text style={styles.logo}>FROM MSTUDIO</Text>}
         renderItem={({ item }) => (          
-          <Item data = {item}/>          
+          <Item data = {item} list = {route.params.listName}/>          
           )}
         keyExtractor={item =>item.id}        
       />
