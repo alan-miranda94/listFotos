@@ -13,9 +13,13 @@ import {claroLogo, nokiaLogo} from '../assets/imgBase64'
 import loadding from '../loadding.json'
 import Lottie from '../components/Lottie'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as MediaLibrary from 'expo-media-library'
+//import libre from 'libreoffice-convert'
+//libre.convertAsync = require('util').promisify(libre.convert)
 
 export default props => {
     const navigation = useNavigation()
+    const route = useRoute()
     const [listFotos, setListFotos] = useState(null)
     const {state, dispatch} = useContext(ListContext)
     const [excel, setExcel] = useState(null)
@@ -23,16 +27,22 @@ export default props => {
     const [name, setName] = useState(null)
     const [status, setStatus] = useState(false)
     const workbook = new ExcelJS.Workbook()
-    const now = new Date();
-    const route = useRoute()
-    workbook.creator = 'APP FEMATEL'
+    const now = new Date()
+    workbook.creator = 'APP RELATORIO'
     workbook.created = now
-    const worksheet = workbook.addWorksheet('RELÁTORIO FOTOGRÁFICO', {views: [{showGridLines: false}]})
+    const worksheet = workbook.addWorksheet('RELÁTORIO FOTOGRÁFICO', 
+      {
+        pageSetup:{
+          paperSize:9, 
+          orientation:'portrait',
+         
+        },
+        views: [{showGridLines: false}]
+      }
+    )
+   // 
 
     useEffect(()=>{
-      //console.log('GERADOR EXCEL',state.atualLista[0].b64)
-      //setImage(state.atualLista[0].b64)
-      // getAllImage(state[route.params.list])
       setListFotos(state[route.params.list])
 
     },[])
@@ -76,25 +86,25 @@ export default props => {
 
     const finalizeSave = async () =>{      
       try{
-        let newListSalvos = []
-        const salvosList = await getData()
-        const nameFake ='R-'+ Math.floor(Math.random()*10000)
-        const jvalue = JSON.stringify(state.atualLista)
-        const endName = name?name:nameFake
+        // let newListSalvos = []
+        // const salvosList = await getData()
+        // const nameFake ='R-'+ Math.floor(Math.random()*10000)
+        // const jvalue = JSON.stringify(state.atualLista)
+        // const endName = name?name:nameFake
         
-        //salva a lista completa com as fotos e os caminhos 
-        await AsyncStorage.setItem(`@${endName}-Editavel`,jvalue)
-        if(excel){
-          //salva o caminho do arquivo excel
-          await AsyncStorage.setItem(`@${endName}-Excel`,excel)
-        }
-        newListSalvos.push(endName)
+        // //salva a lista completa com as fotos e os caminhos 
+        // await AsyncStorage.setItem(`@${endName}-Editavel`,jvalue)
+        // if(excel){
+        //   //salva o caminho do arquivo excel
+        //   await AsyncStorage.setItem(`@${endName}-Excel`,excel)
+        // }
+        // newListSalvos.push(endName)
 
-        if(salvosList){
-          newListSalvos = newListSalvos.concat(salvosList)          
-        }
+        // if(salvosList){
+        //   newListSalvos = newListSalvos.concat(salvosList)          
+        // }
         
-        await AsyncStorage.setItem("@salvos", JSON.stringify(newListSalvos))
+        // await AsyncStorage.setItem("@salvos", JSON.stringify(newListSalvos))
         dispatch({
           type: 'zerar'
         })
@@ -111,6 +121,7 @@ export default props => {
       return new Promise (async (resolve, reject) => {
         const fileName = `Relatório_Fotográfico_`
         //const pat = await MediaLibrary.getAlbumAsync('Relatorio')
+        //muda para dirotio para ficar permanente???
         const fileUri = FileSystem.cacheDirectory + fileName + nameDoc.toUpperCase() + '.xlsx'
         workbook.xlsx.writeBuffer().then( (buffer) => {          
          // console.log(pat)
@@ -122,7 +133,8 @@ export default props => {
           FileSystem.writeAsStringAsync(fileUri, bufferStr, {
             encoding: FileSystem.EncodingType.Base64
           }).then(async() => {
-
+            //converte o pdf
+            
             setExcel(fileUri)
             alert('ARQUIVO GERADO COM SUCESSO')
             resolve(true)
@@ -153,6 +165,10 @@ export default props => {
       worksheet.getCell('N4').font = {color:{argb:"FF0000"}}
 
       
+    }
+
+    const mergeCells = (start, end) =>{
+
     }
 
     //adiciona todas as fotos e suas bordas 
@@ -195,7 +211,7 @@ export default props => {
           bottom: {style:'medium', color: {argb:'000000'}},
           right: {style:'medium', color: {argb:'000000'}}
         }
-        legenda.font = {size:10, bold:true}
+        legenda.font = {size:8, bold:true}
         legenda.value = element.title
         legenda.alignment = { vertical: 'middle', horizontal: 'center',wrapText: true }
       
@@ -209,9 +225,9 @@ export default props => {
         })
         //console.log('GERADOR',element.width)
         worksheet.addImage(foto, {
-          tl: { col: imgCol, row: imgRow },
-          ext: { height: 238 , width:241},
-          editAs: 'oneCell'
+          tl: { col: imgCol + 0.05, row: imgRow + 0.05 },
+          ext: { height: 236 , width:238},
+          editAs: 'undefined'
         } )//(`${linhas[controle][0] + number[0]}:${linhas[controle][1] + number[1]}`))
 
        }else{
@@ -235,16 +251,18 @@ export default props => {
     }
 
     const generateExcel = async ()=>{   
-      if(!name) return(alert('DIGITE O NOME DO SITE'))
+      //if(!name) return(alert('DIGITE O NOME DO SITE'))
       if(listFotos.length === 0) return(alert("NÃO TEM FOTOS NO RELATÓRIO"))
 
       setProgress(true)   
       //pega apenas as imagens da lista
       //const itens = getAllImage(state.atualLista)
-      creatHeard(name)
+      creatHeard(route.params.title)
       addFotos(listFotos)
+      worksheet.pageSetup.printArea = 'A1:P72'
+      //worksheet.pageSetup.printArea = 'A1:P72&&A73:P140&&A141:P208&&A209:P276&&A77:P344&&A345:378'
       //salva arquivo como excel
-      saveExcel(name).then((e)=>{
+      saveExcel(route.params.title).then((e)=>{
         setProgress(false) 
       })
       
@@ -282,13 +300,14 @@ export default props => {
               </View>
             </MaterialCommunityIcons>
             }
-            <MyTextInput 
+            {false&&
+              <MyTextInput 
               title={'NOME DO SITE'}
               value={name}
               placeholder = 'EX:NOME-DO-SITE'
               onChangeText = {(t)=> setName(t)}
             />
-            
+            }
             <Button 
               style={styles.button} 
               onPress={generateExcel}

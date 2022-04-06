@@ -7,160 +7,73 @@ import * as ImagePicker from 'expo-image-picker'
 import * as MediaLibrary from 'expo-media-library'
 import {ListContext} from '../contexts/listContexts'
 import * as FileSystem from 'expo-file-system'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+import { Avatar } from 'react-native-paper';
 
 const MyComponent = props => {
-  const [expanded, setExpanded] = useState(true)
-  const [desc, setDesc] = useState(false);
-  const handlePress = () => setExpanded(!expanded)
-  const [corItem, setCorItem] = useState('#ffffff')
   const navigation = useNavigation()
-  const [image, setImage] = useState(null)
   const {dispatch} = useContext(ListContext)
   
-
-  const convert = async (img)=>{
-    const base64 = await FileSystem.readAsStringAsync(img, { encoding: 'base64' })
-    const b64 = `data:image/png;base64,'+ ${base64}` 
-    return b64
-  }
-   
-
-  const pickImage = async () => {
-   
-    const options = {
-      //mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    }
-
-    const result = await ImagePicker.launchCameraAsync(options)
-    if (!result.cancelled) {
-      const b64 = await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' })
-      //console.log(b64)
-      setImage(result.uri)     
-      savePicture(result.uri,props.data.id, b64)
-
-    }
-  }
-  
-  const getImage = async () => {
-    const options = {
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    }
-    const result = await ImagePicker.launchImageLibraryAsync(options)
-    if (!result.cancelled) {
-      const b64 = await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' })
-      //console.log(b64)
-      setImage(result.uri)     
-    
-      dispatch({
-        type: 'take',
-        payload: {
-          id: props.data.id,
-          img:result.uri,
-          b64: `data:image/png;base64,${b64}` 
-        }
-      })
-      
-
-      //savePicture(result.uri,props.data.id, b64)
-
-    }
-  }
-
-
-  const savePicture = async (picture, id,base64) =>{
+  const openData = async(name)=>{
     try {
-      const asset = await MediaLibrary.createAssetAsync(picture)
-      const existAlbum = await MediaLibrary.getAlbumAsync('Relatorio')
-
-      //verifica se o album existe e move a imagem para o existente
-      if(existAlbum){
-        await MediaLibrary.addAssetsToAlbumAsync(asset,existAlbum.id,false)
-      }else{
-        await MediaLibrary.createAlbumAsync('Relatorio', asset)
-      }    
-        
-      //MediaLibrary.deleteAssetsAsync(asset) 
-      //chama o dispatch aqui depois que salvar na galeria
-      dispatch({
-        type: 'take',
-        payload: {
-          id: id,
-          img:picture,
-          b64: `data:image/png;base64,${base64}` 
-        }
-      })
-      
-      //navigation.navigate('NewList')        
-      
+      const response = await AsyncStorage.getItem(name)
+      const data = response?JSON.parse(response):[]
+      console.log(data)
+      return data
     } catch (error) {
-      console.error(error)
+      console.log(error)
     }
-    
-       
   }
 
-  //console.log('AQUI',props.data)
-  const openClose = ()=>{
-    if (desc) {
-      setDesc(false)
-    }else {
-      setDesc(true)
-    }
+  const pressButton = async ()=>{
+    console.log(props.site)
+    const list = await openData(props.site)
+    const title= props.site.replace('@','')
+    console.log(title)
+    dispatch({
+      type: 'galeria',
+      payload: {
+        list: 'galeria',
+        site: list
+      }
+    })
+    navigation.navigate('NewList',{listName:'galeria', title})
   }
-  
+
   return (
-    <View style={[styles.container]}>
-      <View style={styles.container2}>       
-        <TouchableOpacity 
-          style={styles.texto} 
-          onPress= {openClose}
-        >             
-          <Text>{props.data.title}</Text>  
-          {desc? 
-            <View style={{flexDirection:'row', alignItems:'center'}}>
-              {image&&<Image style={{width:50,height:50}} source={{uri:image}}/>}
-              <Text style={styles.desc}>{props.data.desc}</Text>
-            </View>           
-              
-          :false}           
-        </TouchableOpacity>   
-        
-        <View style={{flexDirection:"row"}}>
-          <TouchableOpacity 
-            onPress = {pickImage}
-          >   
-            <Ionicons  name="camera" size={32}/>
-          </TouchableOpacity>      
-          <TouchableOpacity 
-            onPress = {getImage}
-          >   
-            <Ionicons  name="image-outline" size={32}/>
-          </TouchableOpacity>
-          
-        </View>
-         
-         
-      </View>
-      {props.data.img && <View style= {[styles.barra]}/>}      
-    </View>
+    <TouchableOpacity style={styles.container} onPress={pressButton}>    
+      <View style={{ flex:1}}>
+      <Text style={{fontWeight:'bold', fontSize:16, alignSelf:'center'}}>
+        {props.site.replace('@','')}
+      </Text>
+      </View>  
+      
+      <TouchableOpacity style={styles.texto} onPress={()=>props.remove(props.site)}>
+            <Ionicons
+              style={{ justifyContent: 'flex-end' }}
+              name="trash-outline"
+              size={26}
+            />
+      </TouchableOpacity>
+    </TouchableOpacity>
    
   );
 };
 
 const styles = StyleSheet.create({
   container: {       
+    flexDirection:'row',
+    height:80,
+    alignItems:'center',
+    justifyContent:'space-between',
     borderRadius:5,
+    backgroundColor: "#0a9ffc",
     shadowColor: "black",
     elevation:2,
-    backgroundColor:'#ffffff',
     marginBottom:10,
-    overflow: 'hidden'
+    overflow: 'hidden',
+    padding:8
   },
 
   container2:{   
@@ -174,7 +87,8 @@ const styles = StyleSheet.create({
        
   },
   texto:{
-    width:'80%',
+    //width:'80%',
+    borderLeftWidth:1,
     padding:10,
   },
   

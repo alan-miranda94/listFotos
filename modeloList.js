@@ -1,3 +1,90 @@
+export const AMPLIACAO = [
+  {
+    id: Math.random() * 100,
+    title: "FOTO 01 - VISTA GERAL DO SITE"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 02 - IDENTIFICAÇÃO DO SITE"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 03 - VISTA GERAL DO GABINETE FECHADO"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 04- VISTA DO GABINETE/RACK ABERTO"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 05 - VISTA FRONTAL DO ROUTER"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 06 - VISTA FRONTAL DO ROUTER COM PAINÉIS"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 07 - IDENTIFICAÇÃO DO ROUTER (HOSTNAME)"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 08 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_1"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 09 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_2"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 10 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_3"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 11 - Nº SÉRIE/MDA(s) / SFP(s) AMPLIADA(s)_1"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 12 - Nº SÉRIE/MDA(s) / SFP(s) AMPLIADA(s)_2"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 13 - IDENTIFICAÇÃO DAS F.Os NO DIO_1"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 14 - IDENTIFICAÇÃO DAS F.Os NO DIO_2"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 15 - IDENTIFICAÇÃO DAS F.Os NO DIO_3"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 16 – TÉCNICO COM CRACHÁ"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 17 – TÉCNICO COM PULSEIRA ANTIESTÁTICA"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 18 – LIMPEZA E ORGANIZAÇÃO  _1"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 19 – LIMPEZA E ORGANIZAÇÃO _2"
+  },
+  {
+    id: Math.random() * 100,
+    title: "N/A"
+  },
+  {
+    id: Math.random() * 100,
+    title: "N/A"
+  }
+]
+
 export default [
   {
     id: Math.random() * 100,
@@ -11,6 +98,7 @@ export default [
     id: Math.random() * 100,
     title: "FOTO 03 - VISTA GERAL DO GABINETE FECHADO"
   },
+
   {
     id: Math.random() * 100,
     title: "FOTO 04- VISTA DO GABINETE/RACK ABERTO"
@@ -262,5 +350,14 @@ export default [
   {
     id: Math.random() * 100,
     title: "FOTO 66 – LIMPEZA E ORGANIZAÇÃO _2"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 67 – FERRAMENTAS UTILIZADAS"
+  },
+  {
+    id: Math.random() * 100,
+    title: "FOTO 68 – "
   }
 ]
+

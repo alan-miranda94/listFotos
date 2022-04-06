@@ -10,7 +10,8 @@ export default props => {
   return (
     <TouchableWithoutFeedback
       onPress={()=>inputRef.current.focus()}
-    ><View style={styles.container}>
+    >
+      <View style={styles.container}>
       <Text style={styles.title}>
         {props.title}
       </Text>
