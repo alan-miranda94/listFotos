@@ -189,19 +189,19 @@ export default [
   },
   {
     id: Math.random() * 100,
-    title: "FOTO 26 - FOTO DA CONTROLADORA A"
+    title: "FOTO 26 - FERRAMENTA UTILIZADA"
   },
   {
     id: Math.random() * 100,
-    title: "FOTO 27 - FOTO DA CONTROLADORA B"
+    title: "FOTO 27 - MARCA DE TORQUE"
   },
   {
     id: Math.random() * 100,
-    title: "FOTO 28 - FOTO DA PLACA E1"
+    title: "FOTO 28 - CONSUMO VIA A"
   },
   {
     id: Math.random() * 100,
-    title: "FOTO 29 - IDENTIFICAÇÃO DAS PORTAS ÓPTICAS (MDA 01)"
+    title: "FOTO 29 - CONSUMO VIA B"
   },
   {
     id: Math.random() * 100,

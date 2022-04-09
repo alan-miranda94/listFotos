@@ -57,7 +57,7 @@ const MyComponent = props => {
       setImage(resize.uri)
       setImgHeight(resize.height)
       setImgWidth(resize.width)
-      savePicture(resize.uri, props.data.id, b64)
+      savePicture(resize.uri, b64)
 
     }
   }
@@ -87,23 +87,14 @@ const MyComponent = props => {
         },
       )
 
-
       b64 = resize.base64 //await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' })
       setImage(resize.uri)
-
-
-      dispatch({
-        type: 'take',
-        payload: {
-          list: props.list,
-          item: {
-            id: props.data.id,
-            img: result.uri,
-            width: resize.width,
-            height: resize.height,
-            b64: `data:image/png;base64,${b64}`
-          }
-        }
+      props.takeImage({
+        id: props.data.id,
+        width: resize.width,
+        height:resize.height,
+        img:resize.uri,
+        b64: `data:image/png;base64,${b64}`
       })
       //savePicture(result.uri,props.data.id, b64)
     }
@@ -111,33 +102,40 @@ const MyComponent = props => {
 
 
   //SALVA A IMAGEM DA CAMERA NA GALERIA
-  const savePicture = async (picture, id, base64) => {
+  const savePicture = async (picture,  base64) => {
     try {
+      const name = props.site 
       const asset = await MediaLibrary.createAssetAsync(picture)
-      const existAlbum = await MediaLibrary.getAlbumAsync(props.site)
+      const existAlbum = await MediaLibrary.getAlbumAsync(name)
 
       //verifica se o album existe e move a imagem para o existente
       if (existAlbum !== null) {
-        await MediaLibrary.addAssetsToAlbumAsync(asset, existAlbum.id, false)
+        await MediaLibrary.addAssetsToAlbumAsync(asset, existAlbum.id,)
       } else {
-        await MediaLibrary.createAlbumAsync(props.site, asset)
+        await MediaLibrary.createAlbumAsync(name, asset)
       }
 
-      //MediaLibrary.deleteAssetsAsync(asset) 
-      //chama o dispatch aqui depois que salvar na galeria
-      dispatch({
-        type: 'take',
-        payload: {
-          list: props.list,
-          item: {
-            id: id,
-            width: imgWidth,
-            height: imgHeight,
-            img: picture,
-            b64: `data:image/png;base64,${base64}`
-          }
-        }
+      props.takeImage({
+        width: imgWidth,
+        height: imgHeight,
+        img: picture,
+        b64: `data:image/png;base64,${base64}`
       })
+      //MediaLibrary.deleteAssetsAsync(asset) 
+      // //chama o dispatch aqui depois que salvar na galeria
+      // dispatch({
+      //   type: 'take',
+      //   payload: {
+      //     list: props.list,
+      //     item: {
+      //       id: id,
+      //       width: imgWidth,
+      //       height: imgHeight,
+      //       img: picture,
+      //       b64: `data:image/png;base64,${base64}`
+      //     }
+      //   }
+      // })
       //navigation.navigate('NewList')        
     } catch (error) {
       console.error(error)
@@ -148,21 +146,13 @@ const MyComponent = props => {
 
   //REMOVE IMAGEM DA LISTA 
   const pressRemove = () => {
-    dispatch({
-      type: 'removeItem',
-      payload: {
-        list: props.list,
-        item: {
-          id: props.data.id
-        }
-      }
-    })
+    props.takeImage(null)
   }
 
   return (
     <View style={[styles.container]}>
       <View style={styles.container2}>
-        {props.data.img &&
+        {props.image &&
           <TouchableOpacity style={{ marginLeft: 4 }} onPress={pressRemove} >
 
             <Ionicons name="close-outline" size={26} />
@@ -170,20 +160,20 @@ const MyComponent = props => {
           </TouchableOpacity>
         }
 
-        {props.data.b64 &&
-          <Avatar.Image size={42} source={{ uri: props.data.b64 }} />
+        {props.image &&
+          <Avatar.Image size={42} source={{ uri: props.image}} />
         }
         <View style={{ width: '65%' }}>
           <Text style={styles.texto} numberOfLines={2}>{props.data.title}</Text>
         </View>
 
-        <View style={{ flexDirection: "column", }}>
+        <View style={{flexDirection: "row",}}>
 
           <TouchableOpacity onPress={pickImage} >
             <Ionicons name="camera" size={26} />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={getImage}>
+          <TouchableOpacity onPress={getImage} style = {{marginLeft:4}}>
             <Ionicons name="image-outline" size={26} />
           </TouchableOpacity>
         </View>
@@ -199,7 +189,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 5,
     shadowColor: "black",
-    elevation: 2,
+    //elevation: 2,
     backgroundColor: '#ffffff',
     marginBottom: 10,
     overflow: 'hidden',
@@ -207,7 +197,7 @@ const styles = StyleSheet.create({
   },
 
   container2: {
-    //flex:1,
+    flex:1,
     paddingHorizontal: 8,
     flexDirection: 'row',
     alignItems: 'center',

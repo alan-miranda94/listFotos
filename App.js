@@ -7,7 +7,7 @@ import {
 } from '@react-navigation/native'
 import MainStack from './navigation/MainStack'
 import ListContextProvider from './contexts/listContexts'
-
+import Toast from 'react-native-toast-message'
 export default function App() {
   
   //verifica se tem atualizações no codigo do aplicativo
@@ -30,6 +30,7 @@ export default function App() {
           <MainStack/>
           <StatusBar style="auto" />          
       </NavigationContainer>
+      <Toast />
     </ListContextProvider>
   );
 }

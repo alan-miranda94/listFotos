@@ -10,38 +10,31 @@ import MyTextInput from '../components/MyTextInput'
 import { IconButton, } from 'react-native-paper'
 import Constants from 'expo-constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu'
+import { Menu, MenuItem, List} from 'react-native-material-menu'
 import Toast from 'react-native-toast-message'
 
 export default props => {
   //const { otherParam , title} = props.route.params  
-  const [name, setName] = useState('')
+  // const [name, setName] = useState('')
   const [visible, setVisible] = useState(false)
-  const [hasPermission, setHasPermission] = useState(null)
+  // const [hasPermission, setHasPermission] = useState(null)
 
-  //pega a lista pelo reducer 
-  const { state, dispatch } = useContext(ListContext)
-  const [lista, setLista] = useState([])
-  const [add, setAdd] = useState(false)
-  //const {dispatch} = useContext(ListContext)
+  // //pega a lista pelo reducer 
+  // const { state, dispatch } = useContext(ListContext)
+   const [lista, setLista] = useState([])
+  // const [add, setAdd] = useState(false)
+  // //const {dispatch} = useContext(ListContext)
   const navigation = useNavigation()
   const route = useRoute()
 
-  //pega permisão do usuario par atirar foto
-  useEffect(() => {
-
-    (async () => {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-      setHasPermission(status === 'granted');
-    })()
-
-  }, [])
-
-  //MOSTRA A LISTA ATUAL
-  useEffect(() => {
-    //console.log('NL',state[route.params.listName])
-    setLista(state[route.params.listName])
-  }, [state])
+  // //MOSTRA A LISTA ATUAL
+  // useEffect(() => {
+  //   //console.log('NL',state[route.params.listName])
+  //   if(route.params.listName){
+  //     setLista(state[route.params.listName])
+  //   }
+    
+  // }, [state])
 
 
   //ADICIONA ITEM NA LISTA
@@ -58,10 +51,10 @@ export default props => {
     })
   }
 
-  //VAI PARA A TELA DE GERAR EXCEL
-  const pressGerar = () => {
-    navigation.navigate('GeradorExcel', { list: route.params.listName, title: route.params.title })
-  }
+  // //VAI PARA A TELA DE GERAR EXCEL
+  // const pressGerar = () => {
+  //   navigation.navigate('GeradorExcel', { list: route.params.listName, title: route.params.title })
+  // }
 
   //REMOVE A FOTO DE UM ITEM
   const pressClear = () => {
@@ -104,19 +97,6 @@ export default props => {
     // navigation.reset({ index: 0, routes: [{ name: 'Home' }] })
   }
 
-  const pressFinalizar = async () => {
-    try {
-      dispatch({
-        type: 'zerar'
-      })
-
-      navigation.navigate('Home')
-    } catch (e) {
-      console.log(e)
-      alert('ERRO AO SALVAR')
-    }
-
-  }
   //ESCONDE MENU
   const hideMenu = () => setVisible(false);
 
@@ -136,47 +116,36 @@ export default props => {
   return (
     <View style={styles.container}>
       <View style={styles.barra}>
-        {/* <IconButton
+        <IconButton
           icon='arrow-left'
           size={26}
-          onPress={pressArrow} /> */}
-        <Text style= {{flex:1, textAlign:"center"}}>{route.params.title}</Text>
-        <View style={{ flexDirection: 'row' }}>
+          onPress={pressArrow} />
+        {
+          //route.params.title&&<Text>{route.params.title}</Text>
+          <Text>NOME DO SITE</Text>
+        }  
+         
+        <View style={{ flexDirection: 'row', }}>
+        <IconButton
+          icon='note-plus'
+          //color={'red'}
+          size={26}
+          onPress={()=> navigation.navigate('AddItemInventario',{title:'CEPIC09', listName:'inventario'} )} />{/*title:route.params.title, listName:route.params.listName*/}
           <Menu
             visible={visible}
             anchor={<IconButton icon='menu' size={26} onPress={showMenu} />}
             onRequestClose={hideMenu}
           >
-            <MenuItem onPress={pressSave}><Text>Salvar</Text></MenuItem>
-            <MenuItem onPress={pressGerar}>Gerar Excel</MenuItem>
-            <MenuItem onPress={pressClear}>Limpar</MenuItem>
-            <MenuDivider/>
-            <MenuItem onPress={pressFinalizar}>Finalizar</MenuItem>
+            <MenuItem onPress={()=>{pressSave}}><Text>Salvar</Text></MenuItem>
+            <MenuItem onPress={()=>{pressGerar}}>Gerar Excel</MenuItem>
+            <MenuItem onPress={()=>{pressClear}}>Limpar</MenuItem>
           </Menu>
         </View>
 
       </View>
 
-      {route.params.title === 'EM BRANCO' &&
-        <View style={styles.inputContatiner}>
-          <MyTextInput
-            title={'LEGENDA DA FOTO'}
-            value={name}
-            placeholder='EX:ENTRADA DO SITE'
-            onChangeText={(t) => setName(t)}
-          />
-          <View style={{ flexDirection: 'row' }}>
-            <Button
-              style={styles.button}
-              onPress={addItemList}
-              mode='contained'
-              color="#2196f3"
-            >
-              ADICIONA
-            </Button>
-          </View>
-        </View>
-      }
+      
+
       <FlatList
         data={lista}
         style={{ flexGrow: 1 }}
@@ -185,7 +154,7 @@ export default props => {
         showsVerticalScrollIndicator={false}
         ListFooterComponent={() => <Text style={styles.logo}>FROM MSTUDIO</Text>}
         renderItem={({ item }) => (
-          <Item data={item} site={route.params.title} list={route.params.listName} />
+          <Item data={item} />//site={route.params.title} list={route.params.listName} 
         )}
         keyExtractor={item => item.id}
       />

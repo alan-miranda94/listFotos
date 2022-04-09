@@ -43,7 +43,7 @@ export default props => {
     const coverUri = await onCapture()
     //CRIAR PASTA NA GALERIA COM NOME DA ESTAÇÃO
     const  asset = await MediaLibrary.createAssetAsync(coverUri)
-    await MediaLibrary.createAlbumAsync('Relatorio/'+title, asset, false)
+    await MediaLibrary.createAlbumAsync(title, asset, false)
     navigation.reset({ index: 0, routes: [{name:'NewList', params:{ listName: type, title: title , capa:coverUri}}] })
   }
 
@@ -61,13 +61,6 @@ export default props => {
         </TouchableOpacity>
         <Text>NOVO SITE</Text>
         <View style={{ flexDirection: 'row' }}>
-          {/* <TouchableOpacity style={styles.texto} onPress={() => title ? setNameEstacao(!nameEstacao) : alert('DIGITE O NOME DO SITE')}>
-            <Ionicons
-              style={{ justifyContent: 'flex-end' }}
-              name="checkmark-done-sharp"
-              size={26}
-            />
-          </TouchableOpacity> */}
         </View>
 
       </View>
@@ -79,29 +72,6 @@ export default props => {
           placeholder='EX:PERSOL01'
           onChangeText={(t) => setTitle(t)}
         />
-        {/*
-        <View  style={{margin:10}}>
-          <Text style={{fontWeight:'bold'}}>RELATÓRIO FOTOGRAFICO</Text>
-          <View style={styles.checkBox} >
-            <Checkbox
-              status={checked ? 'checked' : 'unchecked'}
-              onPress={() => {
-                setChecked(!checked);
-              }}
-            />
-            <Text>A PARTIR DE MODELO</Text>
-          </View>
-          <View style={styles.checkBox} >
-            <Checkbox
-              status={checked ? 'checked' : 'unchecked'}
-              onPress={() => {
-                setChecked(!checked);
-              }}
-            />
-            <Text>EM BRANCO</Text>
-          </View>
-        </View> 
-        */}
         {
           <View style={{marginTop: 8 }}>
           <View style={{width:50, height:20, backgroundColor: "#0a9ffc", marginBottom:-3}}/>

@@ -17,6 +17,7 @@ export default props => {
       </Text>
       <TextInput              
         onChangeText={props.onChangeText}
+        autoCapitalize = {"characters"}
         value={props.value}   
         ref = {inputRef}
         placeholder={props.placeholder?props.placeholder:""}

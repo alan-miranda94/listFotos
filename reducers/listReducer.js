@@ -9,7 +9,8 @@ export const initialState = {
   galeria: [],
   title: 'FOTOS',
   branco: [],
-  nameStation: ''
+  nameStation: '',
+  inventario:[]
 }
 
 export const ListReducer = (state, action) => {
@@ -77,7 +78,6 @@ export const ListReducer = (state, action) => {
       return { ...state, [action.payload.list]: novaList }
 
     case 'galeria':
-        console.log('CHAMOU',  action.payload.site)
         
         return { ...state,[action.payload.list]:  action.payload.site}
       
@@ -85,7 +85,7 @@ export const ListReducer = (state, action) => {
      
     //APAGA TODOS AS IMAGENS DA LISTA
     case 'zerar':
-      console.log('REDUCER ZERAR')
+      //console.log('REDUCER ZERAR')
       return { ...initialState }
 
     default:

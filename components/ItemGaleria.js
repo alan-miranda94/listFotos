@@ -19,7 +19,7 @@ const MyComponent = props => {
     try {
       const response = await AsyncStorage.getItem(name)
       const data = response?JSON.parse(response):[]
-      console.log(data)
+      //console.log(data)
       return data
     } catch (error) {
       console.log(error)
@@ -27,10 +27,10 @@ const MyComponent = props => {
   }
 
   const pressButton = async ()=>{
-    console.log(props.site)
+    //console.log(props.site)
     const list = await openData(props.site)
     const title= props.site.replace('@','')
-    console.log(title)
+    //console.log(title)
     dispatch({
       type: 'galeria',
       payload: {
