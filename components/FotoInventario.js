@@ -104,7 +104,7 @@ const MyComponent = props => {
   //SALVA A IMAGEM DA CAMERA NA GALERIA
   const savePicture = async (picture,  base64) => {
     try {
-      const name = props.site 
+      const name = props.site + '-inventario' 
       const asset = await MediaLibrary.createAssetAsync(picture)
       const existAlbum = await MediaLibrary.getAlbumAsync(name)
 

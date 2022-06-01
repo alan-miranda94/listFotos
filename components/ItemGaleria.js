@@ -29,16 +29,26 @@ const MyComponent = props => {
   const pressButton = async ()=>{
     //console.log(props.site)
     const list = await openData(props.site)
-    const title= props.site.replace('@','')
-    //console.log(title)
+    let title= props.site.replace('@','')
+    const isInvetario = title.includes('inventario')
+    console.log(isInvetario)
+
     dispatch({
       type: 'galeria',
       payload: {
-        list: 'galeria',
+        list: isInvetario?'inventario':'galeria',
         site: list
       }
     })
+
+    if(isInvetario){
+      title = title.replace('inventario:','')
+      navigation.navigate('Inventario',{listName:'inventario', title})
+      return
+    }
     navigation.navigate('NewList',{listName:'galeria', title})
+    
+    
   }
 
   return (

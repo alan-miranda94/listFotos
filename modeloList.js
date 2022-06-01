@@ -351,13 +351,5 @@ export default [
     id: Math.random() * 100,
     title: "FOTO 66 – LIMPEZA E ORGANIZAÇÃO _2"
   },
-  {
-    id: Math.random() * 100,
-    title: "FOTO 67 – FERRAMENTAS UTILIZADAS"
-  },
-  {
-    id: Math.random() * 100,
-    title: "FOTO 68 – "
-  }
 ]
 

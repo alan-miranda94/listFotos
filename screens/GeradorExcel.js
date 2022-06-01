@@ -14,9 +14,8 @@ import loadding from '../loadding.json'
 import Lottie from '../components/Lottie'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as MediaLibrary from 'expo-media-library'
-//import libre from 'libreoffice-convert'
-//libre.convertAsync = require('util').promisify(libre.convert)
 import Constants from 'expo-constants'
+import Toast from 'react-native-toast-message'
 
 export default props => {
   const navigation = useNavigation()
@@ -51,6 +50,318 @@ export default props => {
   useEffect(() => {
     navigation.setOptions({ title: 'Gerador Excel' })
   }, [])
+
+  const creatWorkbook = () => {
+    return new ExcelJS.Workbook()
+  }
+
+  const creatWorksheet = (wb, name, orientation = 'portrait') => {
+    const opc = {
+      pageSetup: {
+        paperSize: 9,
+        orientation: orientation,
+      },
+      views: [{ showGridLines: false }]
+    }
+    return wb.addWorksheet(name, opc)
+  }
+
+  const addImageB64 = (wb, img) => {
+    return wb.addImage({
+      base64: img,
+      extension: 'png',
+    })
+  }
+
+  const mergeCells = (ws, start, end) => {
+    try {
+      ws.mergeCells(start, end)
+      return true
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+
+  }
+
+  const addBorder = (ws, cell) => {
+    ws.getCell(cell).border = {
+      top: { style: 'medium', color: { argb: '000000' } },
+      left: { style: 'medium', color: { argb: '000000' } },
+      bottom: { style: 'medium', color: { argb: '000000' } },
+      right: { style: 'medium', color: { argb: '000000' } }
+    }
+  }
+
+  const addBorderInventario = (ws, cell) => {
+    ws.getCell(cell).border = {
+      top: { style: 'thin', color: { argb: '000000' } },
+      left: { style: 'thin', color: { argb: '000000' } },
+      bottom: { style: 'thin', color: { argb: '000000' } },
+      right: { style: 'thin', color: { argb: '000000' } }
+    }
+  }
+
+  const saveWorkbook = (wb, name) => {
+    return new Promise(async (resolve, reject) => {
+      const fileName = `Planilha Padrão de Inventário_`
+      const fileUri = FileSystem.cacheDirectory + fileName + name.toUpperCase() + '.xlsx'
+
+      wb.xlsx.writeBuffer().then((buffer) => {
+
+        // Do this to use base64 encoding
+        const nodeBuffer = NodeBuffer.from(buffer)
+        const bufferStr = nodeBuffer.toString('base64')
+
+        //gravando arquivo
+        FileSystem.writeAsStringAsync(fileUri, bufferStr, {
+          encoding: FileSystem.EncodingType.Base64
+        }).then(async () => {
+          setExcel(fileUri)
+
+          Toast.show({
+            type: 'success',
+            text1: 'Gerado com sucesso'
+          })
+          resolve(true)
+        })
+      })
+    })
+  }
+
+  const creatHeardInvetario = (wb, ws) => {
+    const claroImg = addImageB64(wb, claroLogo)
+    const nokiaImg = addImageB64(wb, nokiaLogo)
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O']
+    const text3rows = ['NOME DO SITE (ID SAP)',
+      'REGIONAL',
+      'TIPO EQUIPAMENTO',
+      'PART NUMBER',
+      'NÚMERO SÉRIE',
+      'DESCRIÇÃO',
+      'NÚMERO DO BP/SGP',
+      'Nº NOTA FISCAL COMPRA',
+      'Código SAP do equipamento,',
+      'FORNECEDOR',
+      'PO 1',
+      'PO 2',
+      'Nº Item PO',
+      'DATA INÍCIO PROJETO',
+      'DATA TÉRMINO PROJETO'
+    ]
+    const sizes =[20,15,15,25,20,60,25,11,15,15,10,10,10,10,10]
+    //COLOCANDO NOME INVENTARIO E IMAGENS
+    mergeCells(ws, 'A1', 'O1')
+    let row = ws.getRow(1)
+    row.height = 50.5
+    ws.getCell('A1').value = 'PLANILHA PADRÃO DE INVENTÁRIO'
+    ws.getCell('A1').font = { size: 14, bold: true }
+    ws.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+    addBorderInventario(ws, 'A1')
+    ws.addImage(claroImg, {
+      tl: { col: 0.1, row: 0.1 },
+      //br: { col: 1.1, row: 1.0 },
+      ext: { width: 60, height: 60 },
+      editAs: 'undefined'
+
+    })
+    ws.addImage(nokiaImg, {
+      tl: { col: 12.5, row: 0.4 },
+      ext: { width: 130, height: 40 },
+      editAs: 'undefined'
+
+    })
+    mergeCells(ws, 'A2', 'K2')
+    ws.getCell('A2').value = 'OBRIGATÓRIO'
+    ws.getCell('A2').font = { size: 10, bold: true }
+    ws.getCell('A2').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+
+    addBorderInventario(ws, 'A2')
+    addBorderInventario(ws, 'L2')
+    mergeCells(ws, 'M2', 'O2')
+    addBorderInventario(ws, 'M2')
+
+    ws.getCell('M2').value = 'OPCIONAL'
+    ws.getCell('M2').font = { size: 10, bold: true, }
+    ws.getCell('M2').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+
+    row = ws.getRow(3)
+    row.height = 60.5
+
+    cols.forEach((i, index) => {
+      
+      let cell = ws.getCell(i + '3')
+      let column = ws.getColumn(i)
+      column.width = sizes[index]
+      cell.value = text3rows[index]
+      cell.font = { size: 10, bold: true, color: { argb: 'FFFFFFFF' } }
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+      addBorderInventario(ws, i + '3')
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF0000' },
+      }
+    })
+    ///FIM--------------------
+  }
+
+  const addItemInventario = async (wb, ws, wsFoto) => {
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O']
+    let rows = 4
+    let controle = 1
+    let linhas = {
+      1: ['B', 'E'],
+      2: ['G', 'J'],
+      3: ['L', 'O']
+    }
+    let legLinhas = {
+      1: ['B', 'D', 'C', 'E'],
+      2: ['G', 'I', 'H', 'J'],
+      3: ['L', 'N', 'M', 'O']
+    }
+    let number = [6, 17]
+    let imgCol = 1
+    let imgRow = 5
+    wsFoto.getCell('P1').value = ' '
+    listFotos.forEach((item, index) => {
+      const dataItens = [
+        route.params.title,
+        'NE',
+        item.sfpEquip ? item.sfpEquip : item.modelo,
+        item.pn,
+        item.numSerie,
+        item.desc,
+        item.numBPSGP ? item.numBPSGP : 'SEM BP',
+        'N/A',
+        item.sap,
+        'NOKIA',
+        ' ', ' ', ' ', ' ', ' '
+      ]
+
+      //ADICIONA ITEM NA PRIMEIRA PLANILHA
+      cols.forEach((c, index) => {
+
+        let gCell = ws.getCell(c + rows)
+        //let gCols = ws.getColumn(c)
+        //let widthCol = dataItens[index].toString().length
+
+        gCell.value = dataItens[index]
+        gCell.font = { size: 10, }
+        gCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+
+        //let beforWidth = ws.getCell(c + (rows - 1)).value ? ws.getCell(c + (rows - 1)).value.toString().length : 10
+        //let maxWidth = widthCol > beforWidth ? widthCol : beforWidth
+
+        //gCols.width = maxWidth < 10 ? 10 : maxWidth + 4
+        addBorderInventario(ws, c + rows)
+      })
+
+      //ADICIONA ITEM NA SEGUNDA 
+      let start = linhas[controle][0] + (number[0])
+      let end = linhas[controle][1] + number[1]
+
+      wsFoto.getCell('A3').value = 'FOTOS'
+      wsFoto.getCell('A3').font = { size: 10, bold: true }
+      wsFoto.getCell('M2').value = 'Estação:'
+      wsFoto.getCell('N2').value = route.params.title
+      wsFoto.getCell('N2').font = { size: 10, color: { argb: 'FF0000' } }
+
+      let img = addImageB64(wb, item.imgMain.b64)
+      
+      mergeCells(wsFoto, start, end)
+      addBorder(wsFoto, linhas[controle][0] + (number[0]))
+
+      wsFoto.addImage(img, {
+        tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+        ext: { height: 216, width: 233 },
+        editAs: 'undefined'
+      })
+
+      //legendas do imagem 
+      mergeCells(wsFoto, legLinhas[controle][0] + (number[0] + 13), legLinhas[controle][2] + (number[0] + 13))
+      let pnL1 = wsFoto.getCell(legLinhas[controle][0] + (number[0] + 13))
+      pnL1.value = 'P/N'
+      pnL1.font = { size: 10, bold: true }
+      pnL1.border = {
+        top: { style: 'thin', color: { argb: '000000' } },
+        left: { style: 'thin', color: { argb: '000000' } },
+      }
+
+      mergeCells(wsFoto, legLinhas[controle][1] + (number[0] + 13), legLinhas[controle][3] + (number[0] + 13))
+      let pnL2 = wsFoto.getCell(legLinhas[controle][1] + (number[0] + 13))
+      pnL2.font = { size: 10, }
+      pnL2.value = item.pn
+      pnL2.border = {
+        top: { style: 'thin', color: { argb: '000000' } },
+        right: { style: 'thin', color: { argb: '000000' } }
+      }
+
+      mergeCells(wsFoto, legLinhas[controle][0] + (number[0] + 14), legLinhas[controle][2] + (number[0] + 14))
+      let bpL1 = wsFoto.getCell(legLinhas[controle][0] + (number[0] + 14))
+      bpL1.value = 'BP/SGP'
+      bpL1.font = { size: 9, bold: true }
+      bpL1.border = {
+        left: { style: 'thin', color: { argb: '000000' } },
+      }
+
+      mergeCells(wsFoto, legLinhas[controle][1] + (number[0] + 14), legLinhas[controle][3] + (number[0] + 14))
+      let bpL2 = wsFoto.getCell(legLinhas[controle][1] + (number[0] + 14))
+      bpL2.font = { size: 10, }
+      bpL2.value = item.numBPSGP ? item.numBPSGP : 'SEM BP'
+      bpL2.border = {
+        right: { style: 'thin', color: { argb: '000000' } }
+      }
+
+      mergeCells(wsFoto, legLinhas[controle][0] + (number[0] + 15), legLinhas[controle][2] + (number[0] + 15))
+      let nsL1 = wsFoto.getCell(legLinhas[controle][0] + (number[0] + 15))
+      nsL1.value = 'Nº de série'
+      nsL1.font = { size: 10, bold: true }
+      nsL1.border = {
+        left: { style: 'thin', color: { argb: '000000' } },
+        bottom: { style: 'thin', color: { argb: '000000' } },
+      }
+
+      mergeCells(wsFoto, legLinhas[controle][1] + (number[0] + 15), legLinhas[controle][3] + (number[0] + 15))
+      let nsL2 = wsFoto.getCell(legLinhas[controle][1] + (number[0] + 15))
+      nsL2.value = item.numSerie
+      nsL2.font = { size: 10, }
+      nsL2.border = {
+        bottom: { style: 'thin', color: { argb: '000000' } },
+        right: { style: 'thin', color: { argb: '000000' } }
+      }
+
+      rows += 1
+      if (controle === 3) {
+        imgRow += 17
+        number[0] += 17
+        number[1] += 17
+      }
+
+      controle === 3 ? controle = 1 : controle += 1
+      imgCol === 11 ? imgCol = 1 : imgCol += 5
+
+    })
+  }
+
+  const gerarInventario = async () => {
+    setProgress(true)
+    setTimeout(() => {
+      const wbInventario = creatWorkbook()
+      const now = new Date()
+      wbInventario.creator = 'APP RELATORIO'
+      wbInventario.created = now
+      const wsInventario = creatWorksheet(wbInventario, 'inventário', 'landscape')
+      const wsRBPSGP = creatWorksheet(wbInventario, 'Relatório_Fotos_BP_SGP')
+
+      creatHeardInvetario(wbInventario, wsInventario)
+      addItemInventario(wbInventario, wsInventario, wsRBPSGP)
+
+      saveWorkbook(wbInventario, route.params.title).then(() => setProgress(false))
+    }, 1 * 1000)
+
+
+  }
 
   const getAllImage = (list) => {
 
@@ -128,7 +439,7 @@ export default props => {
   //adiciona as logos e o nome do site no inicio
   const creatHeard = (nameSite) => {
     //CARREGANDO IMAGENS DA LOGO  E ADICIONANDO NA PLANILHA
-    setStatus("ADICIONANDO LOGOS DA NOKIA E CLARO")
+
     const cLogo = workbook.addImage({
       base64: claroLogo,
       extension: 'png',
@@ -141,15 +452,11 @@ export default props => {
     worksheet.addImage(nLogo, 'A2:C3')
 
     //ADICIONA A ESAÇÃO
-    setStatus('COLOCANDO ESTAÇÃO')
+
     worksheet.getCell('M4').value = 'Estação'
     worksheet.getCell('N4').value = nameSite
     worksheet.getCell('N4').font = { color: { argb: "FF0000" } }
 
-
-  }
-
-  const mergeCells = (start, end) => {
 
   }
 
@@ -207,8 +514,8 @@ export default props => {
         })
         //console.log('GERADOR',element.width)
         worksheet.addImage(foto, {
-          tl: { col: imgCol + 0.05, row: imgRow + 0.05 },
-          ext: { height: 236, width: 238 },
+          tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+          ext: { height: 216, width: 233 },
           editAs: 'undefined'
         })//(`${linhas[controle][0] + number[0]}:${linhas[controle][1] + number[1]}`))
 
@@ -237,11 +544,9 @@ export default props => {
     if (listFotos.length === 0) return (alert("NÃO TEM FOTOS NO RELATÓRIO"))
 
     setProgress(true)
-    //pega apenas as imagens da lista
-    //const itens = getAllImage(state.atualLista)
     creatHeard(route.params.title)
     addFotos(listFotos)
-    worksheet.pageSetup.printArea = 'A1:P72'
+    // worksheet.pageSetup.printArea = 'A1:P72'
     //worksheet.pageSetup.printArea = 'A1:P72&&A73:P140&&A141:P208&&A209:P276&&A77:P344&&A345:378'
     //salva arquivo como excel
     saveExcel(route.params.title).then((e) => {
@@ -303,7 +608,7 @@ export default props => {
       }
       <Button
         style={styles.button}
-        onPress={generateExcel}
+        onPress={route.params.inventario ? gerarInventario : generateExcel}
         mode='contained'
         color="#2196f3"
       >

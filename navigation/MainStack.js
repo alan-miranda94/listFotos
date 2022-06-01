@@ -14,7 +14,7 @@ const Stack = createNativeStackNavigator()
 
 export default () => (
   <Stack.Navigator 
-    initialRouteName=  'Inventario'
+    initialRouteName=  'Home'
     screenOptions={{
         headerShown: false
     }}>

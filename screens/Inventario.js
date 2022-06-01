@@ -1,16 +1,16 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Text, SafeAreaView, StyleSheet, FlatList, View, TouchableOpacity } from 'react-native'
-import Item from '../components/Item'
+import ItemInventario from '../components/ItemInventario'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { ListContext } from '../contexts/listContexts'
 import { Ionicons } from '@expo/vector-icons'
 //import * as Sharing from 'expo-sharing'
 import * as ImagePicker from 'expo-image-picker'
-import MyTextInput from '../components/MyTextInput'
-import { IconButton, } from 'react-native-paper'
+
+import { IconButton,List, } from 'react-native-paper'
 import Constants from 'expo-constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Menu, MenuItem, List} from 'react-native-material-menu'
+import { Menu, MenuItem,MenuDivider} from 'react-native-material-menu'
 import Toast from 'react-native-toast-message'
 
 export default props => {
@@ -20,46 +20,37 @@ export default props => {
   // const [hasPermission, setHasPermission] = useState(null)
 
   // //pega a lista pelo reducer 
-  // const { state, dispatch } = useContext(ListContext)
-   const [lista, setLista] = useState([])
+  const { state, dispatch } = useContext(ListContext)
+  const [lista, setLista] = useState([])
   // const [add, setAdd] = useState(false)
   // //const {dispatch} = useContext(ListContext)
   const navigation = useNavigation()
   const route = useRoute()
 
-  // //MOSTRA A LISTA ATUAL
-  // useEffect(() => {
-  //   //console.log('NL',state[route.params.listName])
-  //   if(route.params.listName){
-  //     setLista(state[route.params.listName])
-  //   }
-    
-  // }, [state])
+  //MOSTRA A LISTA ATUAL
+  useEffect(() => {
+    //console.log('NL',state[route.params.listName])
+    //pode receber a lista da galeria 
+    setLista(state[route.params.listName])
+
+  }, [state])
 
 
   //ADICIONA ITEM NA LISTA
   const addItemList = (item) => {
-    dispatch({
-      type: 'novoItem',
-      payload: {
-        list: route.params.type,
-        item: {
-          id: Math.floor(Math.random() * 1000),
-          title: name
-        }
-      }
-    })
+    hideMenu()
+    navigation.navigate('AddItemInventario', { title: route.params.title, listName: 'inventario' }) 
   }
 
-  // //VAI PARA A TELA DE GERAR EXCEL
-  // const pressGerar = () => {
-  //   navigation.navigate('GeradorExcel', { list: route.params.listName, title: route.params.title })
-  // }
+  //VAI PARA A TELA DE GERAR EXCEL
+  const pressGerar = () => {
+    navigation.navigate('GeradorExcel', { list: route.params.listName, title: route.params.title , inventario:true})
+  }
 
   //REMOVE A FOTO DE UM ITEM
   const pressClear = () => {
     dispatch({
-      type: 'clearOne',
+      type: 'clearInventario',
       payload: {
         list: route.params.listName,
       }
@@ -70,7 +61,7 @@ export default props => {
   const saveData = async (name, item) => {
     try {
       const jItem = JSON.stringify(item)
-      await AsyncStorage.setItem('@' + name, jItem)
+      await AsyncStorage.setItem('@inventario:' + name , jItem)
       Toast.show({
         type: 'success',
         text1: 'Salvo com sucesso'
@@ -112,39 +103,55 @@ export default props => {
     navigation.navigate('Home')
 
   }
+  const pressFinalizar = async () => {
+    try {
+      dispatch({
+        type: 'zerar'
+      })
+
+      navigation.navigate('Home')
+    } catch (e) {
+      console.log(e)
+      alert('ERRO AO SALVAR')
+    }
+
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.barra}>
-        <IconButton
-          icon='arrow-left'
-          size={26}
-          onPress={pressArrow} />
+      <IconButton
+            icon='note-plus'
+            //color={'red'}
+            size={26}
+            onPress={addItemList}/>{/*title:route.params.title, listName:route.params.listName*/}
+         
         {
           //route.params.title&&<Text>{route.params.title}</Text>
-          <Text>NOME DO SITE</Text>
-        }  
-         
+          <Text>{ route.params.title}</Text>
+        }
+
         <View style={{ flexDirection: 'row', }}>
-        <IconButton
-          icon='note-plus'
-          //color={'red'}
-          size={26}
-          onPress={()=> navigation.navigate('AddItemInventario',{title:'CEPIC09', listName:'inventario'} )} />{/*title:route.params.title, listName:route.params.listName*/}
+          
           <Menu
             visible={visible}
             anchor={<IconButton icon='menu' size={26} onPress={showMenu} />}
             onRequestClose={hideMenu}
           >
-            <MenuItem onPress={()=>{pressSave}}><Text>Salvar</Text></MenuItem>
-            <MenuItem onPress={()=>{pressGerar}}>Gerar Excel</MenuItem>
-            <MenuItem onPress={()=>{pressClear}}>Limpar</MenuItem>
+           { 
+            <MenuItem  onPress={pressSave}><Text>Salvar</Text></MenuItem>
+           }
+            <MenuItem onPress={ pressGerar }>Gerar Excel</MenuItem>
+            <MenuItem onPress={pressClear }>Limpar</MenuItem>
+            <MenuDivider/>
+            <MenuItem onPress={pressFinalizar}>Finalizar</MenuItem>
+
           </Menu>
         </View>
 
       </View>
 
-      
+
 
       <FlatList
         data={lista}
@@ -154,7 +161,7 @@ export default props => {
         showsVerticalScrollIndicator={false}
         ListFooterComponent={() => <Text style={styles.logo}>FROM MSTUDIO</Text>}
         renderItem={({ item }) => (
-          <Item data={item} />//site={route.params.title} list={route.params.listName} 
+          <ItemInventario data={item} />//site={route.params.title} list={route.params.listName} 
         )}
         keyExtractor={item => item.id}
       />

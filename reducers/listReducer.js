@@ -48,6 +48,23 @@ export const ListReducer = (state, action) => {
         ...state,
         branco: newList
       }
+    
+    case 'addInventario':
+      let newInventario = [...state.inventario, action.payload.item]
+      return {
+        ...state,
+        inventario:newInventario
+      }
+    
+    case 'clearInventario':{
+      return {...state, inventario:[]}
+    }
+    case 'removeItemInventario':
+      const inv = state[action.payload.list].filter((item)=>{
+       if( item.id === action.payload.item.id) {return false}
+       return true
+      })
+      return{...state,[action.payload.list]:inv}
 
     case 'removeItem':
       console.log('REDUCER - REMOVE ITEM')

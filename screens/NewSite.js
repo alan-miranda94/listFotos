@@ -40,11 +40,12 @@ export default props => {
       return
     }
     //CRIAR UMA FOTO PADRÃO COM O NOME DO SITE 
+    const name = title + '-inventario' 
     const coverUri = await onCapture()
     //CRIAR PASTA NA GALERIA COM NOME DA ESTAÇÃO
     const  asset = await MediaLibrary.createAssetAsync(coverUri)
-    await MediaLibrary.createAlbumAsync(title, asset, false)
-    navigation.reset({ index: 0, routes: [{name:'NewList', params:{ listName: type, title: title , capa:coverUri}}] })
+    await MediaLibrary.createAlbumAsync(name, asset, false)
+    navigation.reset({ index: 0, routes: [{name:type==='inventario'?'Inventario':'NewList', params:{ title: title , listName: type,  capa:coverUri}}] })
   }
 
   return (
@@ -100,10 +101,10 @@ export default props => {
         </Button>
         <Button
           style={styles.button}
-          onPress={() => { }}
+          onPress={() =>  pressButton(title, 'inventario')}
           mode='contained'
           color="#2196f3"
-          disabled={true}
+          disabled={false}
 
         >
           INVENTARIO
