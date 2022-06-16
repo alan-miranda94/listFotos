@@ -29,12 +29,12 @@ export default props => {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
       setHasPermission(status === 'granted');
     })()
-
+    
   }, [])
 
   const onCapture = useCallback(async () => coverRef.current.capture())
 
-  const pressButton = async (title, type) => {
+  const pressButton = async (title, listName,type ) => {
     if (!title) {
       alert('DIGITE O NOME DO SITE')
       return
@@ -45,7 +45,22 @@ export default props => {
     //CRIAR PASTA NA GALERIA COM NOME DA ESTAÇÃO
     const  asset = await MediaLibrary.createAssetAsync(coverUri)
     await MediaLibrary.createAlbumAsync(name, asset, false)
-    navigation.reset({ index: 0, routes: [{name:type==='inventario'?'Inventario':'NewList', params:{ title: title , listName: type,  capa:coverUri}}] })
+    navigation.reset(
+      { 
+        index: 0, 
+        routes: [
+          {
+            name:type==='inventario'?'Inventario':'NewList', 
+            params:{ 
+              title: title , 
+              listName: listName,
+              type:type , 
+              capa:coverUri
+            }
+          }
+        ] 
+      }
+    )
   }
 
   return (
@@ -85,33 +100,38 @@ export default props => {
         }
         <Button
           style={styles.button}
-          onPress={() => pressButton(title, 'modelo')}
+          onPress={() => pressButton(title, 'modelo','Instalação')}
           mode='contained'
           color="#2196f3"
         >
-          RELATÓRIO FOTOGRÁFICO
+          INSTALAÇÃO
         </Button>
         <Button
           style={styles.button}
-          onPress={() => pressButton(title, 'ampliacao')}
+          onPress={() => pressButton(title, 'ampliacao','Ampliação')}
           mode='contained'
           color="#2196f3"
         >
-          RF - AMPLIAÇÃO/MIGRAÇÃO
+         AMPLIAÇÃO
         </Button>
         <Button
           style={styles.button}
-          onPress={() =>  pressButton(title, 'inventario')}
+          onPress={() => pressButton(title, 'migracao','Migração')}
+          mode='contained'
+          color="#2196f3"
+        >
+          MIGRAÇÃO
+        </Button>
+        <Button
+          style={styles.button}
+          onPress={() =>  pressButton(title, 'inventario','inventario')}
           mode='contained'
           color="#2196f3"
           disabled={false}
-
         >
-          INVENTARIO
+          INVENTÁRIO
         </Button>
       </View>
-
-
     </View >
 
   )

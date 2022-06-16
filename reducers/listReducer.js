@@ -1,9 +1,10 @@
 import js from '../lista2.json'
 import { rackNovo, existente, ampliacao } from '../listData'
-import modelo, { AMPLIACAO } from '../modeloList'
+import modelo, { AMPLIACAO, MIGRACAO } from '../modeloList'
 
 export const initialState = {
   ampliacao: AMPLIACAO,
+  migracao: MIGRACAO,
   atualLista: [],
   modelo: modelo,
   galeria: [],
@@ -23,10 +24,10 @@ export const ListReducer = (state, action) => {
 
           return {
             ...item,
-            img: action.payload.item.img,
-            b64: action.payload.item.b64,
-            width: action.payload.width,
-            height: action.payload.height,
+            img:action.payload.item //action.payload.item.img,
+            // b64: action.payload.item.b64,
+            // width: action.payload.width,
+            // height: action.payload.height,
           }
         } else {
           return item
@@ -59,6 +60,7 @@ export const ListReducer = (state, action) => {
     case 'clearInventario':{
       return {...state, inventario:[]}
     }
+
     case 'removeItemInventario':
       const inv = state[action.payload.list].filter((item)=>{
        if( item.id === action.payload.item.id) {return false}

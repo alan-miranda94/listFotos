@@ -6,30 +6,28 @@ import { ListContext } from '../contexts/listContexts'
 import { Ionicons } from '@expo/vector-icons'
 //import * as Sharing from 'expo-sharing'
 import * as ImagePicker from 'expo-image-picker'
-
-import { IconButton,List, } from 'react-native-paper'
+import { ROT, SFP } from '../ROT-FPS'
+import { IconButton, List, Searchbar, RadioButton, TextInput } from 'react-native-paper'
 import Constants from 'expo-constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Menu, MenuItem,MenuDivider} from 'react-native-material-menu'
+import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu'
 import Toast from 'react-native-toast-message'
 
 export default props => {
-  //const { otherParam , title} = props.route.params  
-  // const [name, setName] = useState('')
   const [visible, setVisible] = useState(false)
-  // const [hasPermission, setHasPermission] = useState(null)
-
   // //pega a lista pelo reducer 
   const { state, dispatch } = useContext(ListContext)
   const [lista, setLista] = useState([])
-  // const [add, setAdd] = useState(false)
-  // //const {dispatch} = useContext(ListContext)
   const navigation = useNavigation()
   const route = useRoute()
-
+  const [expanded, setExpanded] = useState(false)
+  const [expandedEquipamento, setExpandedEquipamento] = useState(false)
+  const [equipamentos, setEquipamentos] = useState(ROT)
+  const [equipamento, setEquipamento] = useState(null)
+  const [type, setType] = useState('Instalação')
+  
   //MOSTRA A LISTA ATUAL
   useEffect(() => {
-    //console.log('NL',state[route.params.listName])
     //pode receber a lista da galeria 
     setLista(state[route.params.listName])
 
@@ -38,13 +36,46 @@ export default props => {
 
   //ADICIONA ITEM NA LISTA
   const addItemList = (item) => {
-    hideMenu()
-    navigation.navigate('AddItemInventario', { title: route.params.title, listName: 'inventario' }) 
+    if (equipamento) {
+      hideMenu()
+      navigation.navigate(
+        'AddItemInventario',
+        {
+          title: route.params.title,
+          listName: 'inventario',
+          equipName: equipamento['MODELO'],
+          
+        }
+      )
+      return
+    }
+    Toast.show({
+      type: 'info',
+      text1: 'SELECIONE O EQUIPAMENTO PRIMEIRO'
+    })
+
   }
 
   //VAI PARA A TELA DE GERAR EXCEL
   const pressGerar = () => {
-    navigation.navigate('GeradorExcel', { list: route.params.listName, title: route.params.title , inventario:true})
+    if (equipamento) {
+      hideMenu()
+      navigation.navigate(
+        'GeradorExcel',
+        {
+          list: route.params.listName,
+          title: route.params.title,
+          inventario: true,
+          equipName: equipamento['MODELO'],
+          type:type
+        })
+      return
+    }
+    hideMenu()
+    Toast.show({
+      type: 'info',
+      text1: 'SELECIONE O EQUIPAMENTO PRIMEIRO'
+    })
   }
 
   //REMOVE A FOTO DE UM ITEM
@@ -61,7 +92,7 @@ export default props => {
   const saveData = async (name, item) => {
     try {
       const jItem = JSON.stringify(item)
-      await AsyncStorage.setItem('@inventario:' + name , jItem)
+      await AsyncStorage.setItem('@inventario:' + name, jItem)
       Toast.show({
         type: 'success',
         text1: 'Salvo com sucesso'
@@ -94,6 +125,17 @@ export default props => {
   //MOSTRA MEN
   const showMenu = () => setVisible(true);
 
+
+  const handlePress = () => setExpanded(!expanded)
+  const handlePressEquipamento = () => setExpandedEquipamento(!expandedEquipamento)
+
+  //REDUZ A LISTA DE ACORDO COM A PESQUISA
+  const onChangeSearch = (query, t) => {
+    let equip = ROT.filter(item => item['MODELO'].includes(query) || item['PN'].includes(query))
+    setEquipamentos(equip)
+  }
+
+
   //RETORNA PARA TELA ANTERIOR
   const pressArrow = () => {
     if (route.params.listName === 'galeria') {
@@ -103,6 +145,7 @@ export default props => {
     navigation.navigate('Home')
 
   }
+
   const pressFinalizar = async () => {
     try {
       dispatch({
@@ -117,33 +160,38 @@ export default props => {
 
   }
 
+  const pressSelectEquip = (equip) => {
+    setEquipamento(equip)
+    handlePress()
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.barra}>
-      <IconButton
-            icon='note-plus'
-            //color={'red'}
-            size={26}
-            onPress={addItemList}/>{/*title:route.params.title, listName:route.params.listName*/}
-         
+        <IconButton
+          icon='note-plus'
+          //color={'red'}
+          size={26}
+          onPress={addItemList} />{/*title:route.params.title, listName:route.params.listName*/}
+
         {
           //route.params.title&&<Text>{route.params.title}</Text>
-          <Text>{ route.params.title}</Text>
+          <Text>{route.params.title}</Text>
         }
 
         <View style={{ flexDirection: 'row', }}>
-          
           <Menu
             visible={visible}
             anchor={<IconButton icon='menu' size={26} onPress={showMenu} />}
             onRequestClose={hideMenu}
           >
-           { 
-            <MenuItem  onPress={pressSave}><Text>Salvar</Text></MenuItem>
-           }
-            <MenuItem onPress={ pressGerar }>Gerar Excel</MenuItem>
-            <MenuItem onPress={pressClear }>Limpar</MenuItem>
-            <MenuDivider/>
+            {
+              //ESTA DANDO ERRO QUANDO TEM MUITAS IMAGENS
+              //<MenuItem onPress={pressSave}><Text>Salvar</Text></MenuItem>
+            }
+            <MenuItem onPress={pressGerar}>Gerar Excel</MenuItem>
+            <MenuItem onPress={pressClear}>Limpar</MenuItem>
+            <MenuDivider />
             <MenuItem onPress={pressFinalizar}>Finalizar</MenuItem>
 
           </Menu>
@@ -151,7 +199,45 @@ export default props => {
 
       </View>
 
-
+      <List.Section>
+        <RadioButton.Group style={{ flexDirection: 'row-reverse', }} onValueChange={newType => setType(newType)} value={type}>
+          <View style={{ flexDirection: 'row', backgroundColor: "white" , width:'100%'}}>
+            <RadioButton.Item label="Instalação" value="Instalação" labelStyle={{fontSize:12}}/>
+            <RadioButton.Item label='Migração' value="Migração" labelStyle={{fontSize:12}}/>
+            <RadioButton.Item label='Ampliação' value="Ampliação" labelStyle={{fontSize:12}}/>
+          </View>
+        </RadioButton.Group>
+        <List.Accordion
+          style={{ backgroundColor: 'white', elevation: 2 }}
+          title={equipamento ? equipamento['MODELO'] : 'SELECIONE O EQUIPAMENTO'}
+          id={1}
+          expanded={expanded}
+          onPress={handlePress}
+        >
+          <Searchbar
+            style={{ elevation: 2, }}
+            placeholder="Search"
+            onChangeText={onChangeSearch}
+            autoCapitalize={"characters"}
+          />
+          <FlatList
+            data={equipamentos}
+            style={{ flexGrow: 1, backgroundColor: 'white' }}
+            initialNumToRender={12}
+            contentContainerStyle={{ padding: 10, paddingBottom: 40, }}
+            showsVerticalScrollIndicator={false}
+            ListFooterComponent={() => <Text style={styles.logo}>FROM MSTUDIO</Text>}
+            renderItem={({ item }) => (
+              <List.Item
+                title={`${item["MODELO"]} | ${item['PN']}`}
+                description={`${item["DESCRIÇÃO"]}`}
+                onPress={() => pressSelectEquip(item)}
+              />
+            )}
+            keyExtractor={item => item.id}
+          />
+        </List.Accordion>
+      </List.Section>
 
       <FlatList
         data={lista}

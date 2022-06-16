@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^12.0.0",
+    "@nozbe/watermelondb": "^0.24.0",
     "@react-native-async-storage/async-storage": "~1.15.0",
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/native-stack": "^6.5.0",
@@ -25,14 +26,22 @@
     "expo-splash-screen": "~0.14.1",
     "expo-status-bar": "~1.2.0",
     "expo-updates": "~0.11.6",
+    "expo-web-browser": "~10.1.0",
     "html-to-image": "^1.9.0",
+    "jszip": "^3.10.0",
     "lottie-react-native": "5.0.1",
+    "nodemailer": "^6.7.5",
+    "nodemailer-react": "^1.0.2",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-native": "0.64.3",
     "react-native-draggable-flatlist": "^3.0.7",
     "react-native-file-viewer": "^2.1.5",
+    "react-native-gesture-handler": "^2.4.2",
+    "react-native-image-pan-zoom": "^2.1.12",
+    "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-material-menu": "^2.0.0",
+    "react-native-modalize": "^2.0.13",
     "react-native-paper": "^4.11.2",
     "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "~3.10.1",
@@ -42,7 +51,8 @@
     "text-to-image": "^5.2.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.12.9",
+    "@babel/plugin-proposal-decorators": "^7.18.2"
   },
   "private": true
 }

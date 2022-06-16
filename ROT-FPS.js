@@ -8,7 +8,7 @@ export const ROT = [
     },
     {
         "id": Math.random(),
-        "MODELO": "SAR-X",
+        "MODELO": "7705 SAR-X",
         "PN": "3HE08534AA",
         "DESCRIÇÃO": "ROTEADOR SAR-X 1G BNDL 2 TX 2 SFP OTICA",
         "SAP": 30014237
@@ -57,28 +57,28 @@ export const ROT = [
     },
     {
         "id": Math.random(),
-        "MODELO": " SR-12",
+        "MODELO": "7750 SR-12",
         "PN": "3HE04580AA",
         "DESCRIÇÃO": "CCM - 7750 SR-c12 CCM-XP",
         "SAP": 30014376
     },
     {
         "id": Math.random(),
-        "MODELO": " SR-12",
+        "MODELO": "7750 SR-12",
         "PN": "3HE03607AA",
         "DESCRIÇÃO": "CFM - 7750 SR C12 CFM-XP ",
         "SAP": 30003432
     },
     {
         "id": Math.random(),
-        "MODELO": " SR-12",
+        "MODELO": "7750 SR-12",
         "PN": "3HE03608AA",
         "DESCRIÇÃO": "Modulo MCM - 7750 SR-c12 MCM-XP",
         "SAP": 30003433
     },
     {
         "id": Math.random(),
-        "MODELO": " SR-12",
+        "MODELO": "7750 SR-12",
         "PN": "3HE00021AA",
         "DESCRIÇÃO": "MDA - 7750 SR 60-PT 10\/100TX RJ21",
         "SAP": 30003425
@@ -92,14 +92,14 @@ export const ROT = [
     },
     {
         "id": Math.random(),
-        "MODELO": "SAR-8",
+        "MODELO": "7705 SAR-8",
         "PN": "3HE02773AA",
         "DESCRIÇÃO": "Gabinete SAR-8",
         "SAP": 30003438
     },
     {
         "id": Math.random(),
-        "MODELO": "SAR-8",
+        "MODELO": "7705 SAR-8",
         "PN": "3HE02778AA",
         "DESCRIÇÃO": "Modulo FAN SAR-8",
         "SAP": 22020840
@@ -113,7 +113,7 @@ export const ROT = [
     },
     {
         "id": Math.random(),
-        "MODELO": "SAR-8",
+        "MODELO": "7705 SAR-8",
         "PN": "3HE02776AB",
         "DESCRIÇÃO": "Placa 8 PORTAS GE\/FE ETHERNET CARD V2",
         "SAP": 30003441
@@ -197,35 +197,35 @@ export const ROT = [
     },
     {
         "id": Math.random(),
-        "MODELO": "IXR-E",
+        "MODELO": "7250 IXR-e",
         "PN": "3HE14782AA",
         "DESCRIÇÃO": "CHASSIS ROTEADOR DIGITAL 7250 IXR-E",
         "SAP": 40000516
     },
     {
         "id": Math.random(),
-        "MODELO": "IXR-E",
+        "MODELO": "IXR-e",
         "PN": "3HE14785AA",
         "DESCRIÇÃO": "FONTE DE ALIMENTAÇÃO OS 7250 IXR-E DC",
         "SAP": 40000519
     },
     {
         "id": Math.random(),
-        "MODELO": "IXR-R6",
+        "MODELO": "7250 IXR-R6",
         "PN": "3HE11278AA",
         "DESCRIÇÃO": "7250 IXR-R6 Chassis ",
         "SAP": 40000493
     },
     {
         "id": Math.random(),
-        "MODELO": "IXR-R6",
+        "MODELO": "7250 IXR-R6",
         "PN": "3HE11283AA",
         "DESCRIÇÃO": "7250 IXR-R6 CPIOM ",
         "SAP": 40000489
     },
     {
         "id": Math.random(),
-        "MODELO": "IXR-R6",
+        "MODELO": "7250 IXR-R6",
         "PN": "3HE11279AA",
         "DESCRIÇÃO": "FAN MODULE",
         "SAP": 22058527
@@ -239,14 +239,14 @@ export const ROT = [
     },
     {
         "id": Math.random(),
-        "MODELO": "IXR-R6",
+        "MODELO": "7250 IXR-R6",
         "PN": "3HE11282AA",
         "DESCRIÇÃO": "6-10GE, 1-100GE — 1-port 100GigE QSFP+ and 6port SFP+\/SFP combination MDA",
         "SAP": 40000492
     },
     {
         "id": Math.random(),
-        "MODELO": "IXR-R6",
+        "MODELO": "7250 IXR-R6",
         "PN": "3HE11284AA",
         "DESCRIÇÃO": "20-1GE-CSFP — 20-port 1GigE cSFP MDA ",
         "SAP": 40000491
@@ -260,7 +260,7 @@ export const ROT = [
     },
     {
         "id": Math.random(),
-        "MODELO": "IXR-R6",
+        "MODELO": "7250 IXR-R6",
         "PN": "3HE02781AA",
         "DESCRIÇÃO": "32-port ASAP T1\/E",
         "SAP": 22009289

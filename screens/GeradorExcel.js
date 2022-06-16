@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react'
-import { StyleSheet, View, Image, Text, Linking, WebView } from 'react-native'
+import { StyleSheet, View, Image, Text, Linking, WebView, Alert } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { ListContext } from '../contexts/listContexts'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -16,6 +16,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as MediaLibrary from 'expo-media-library'
 import Constants from 'expo-constants'
 import Toast from 'react-native-toast-message'
+import JSZip from 'jszip'
+//import { Mailer } from "nodemailer-react";
+import SMTP_CONFIG from "../config/smtp"
 
 export default props => {
   const navigation = useNavigation()
@@ -25,8 +28,10 @@ export default props => {
   const [excel, setExcel] = useState(null)
   const [progress, setProgress] = useState(false)
   const [name, setName] = useState(null)
-  const [status, setStatus] = useState(false)
+  const [b64Excel, setB64Excel] = useState()
+  const [filesZipe, setFileZip] = useState()
   const workbook = new ExcelJS.Workbook()
+  const zip = new JSZip()
   const now = new Date()
   workbook.creator = 'APP RELATORIO'
   workbook.created = now
@@ -44,6 +49,7 @@ export default props => {
 
   useEffect(() => {
     setListFotos(state[route.params.list])
+    console.log(route.params)
 
   }, [])
 
@@ -51,10 +57,12 @@ export default props => {
     navigation.setOptions({ title: 'Gerador Excel' })
   }, [])
 
+  //INICIALIZA ARQUIVO EXCEL
   const creatWorkbook = () => {
     return new ExcelJS.Workbook()
   }
 
+  //CRIA UMA PLANILHA NO ARQUIVO
   const creatWorksheet = (wb, name, orientation = 'portrait') => {
     const opc = {
       pageSetup: {
@@ -66,6 +74,7 @@ export default props => {
     return wb.addWorksheet(name, opc)
   }
 
+  //ADICIONA IMAGEM NO FORMATO BASE64
   const addImageB64 = (wb, img) => {
     return wb.addImage({
       base64: img,
@@ -73,6 +82,7 @@ export default props => {
     })
   }
 
+  //MESCLA AS CELULAS
   const mergeCells = (ws, start, end) => {
     try {
       ws.mergeCells(start, end)
@@ -84,6 +94,7 @@ export default props => {
 
   }
 
+  //ADD BORDA TOTAL
   const addBorder = (ws, cell) => {
     ws.getCell(cell).border = {
       top: { style: 'medium', color: { argb: '000000' } },
@@ -93,6 +104,7 @@ export default props => {
     }
   }
 
+  //ADD BORDA TOTAL
   const addBorderInventario = (ws, cell) => {
     ws.getCell(cell).border = {
       top: { style: 'thin', color: { argb: '000000' } },
@@ -102,10 +114,12 @@ export default props => {
     }
   }
 
+  //NO MOMENTO SO SALVA DO INVENTARIO
   const saveWorkbook = (wb, name) => {
     return new Promise(async (resolve, reject) => {
-      const fileName = `Planilha Padrão de Inventário_`
-      const fileUri = FileSystem.cacheDirectory + fileName + name.toUpperCase() + '.xlsx'
+      //Relatório_Fotográfico_7705 SAR-X_CEAER13-RMP01_(Ampliação)_Rev.0
+      const fileName = `Planilha Padrão de Inventário_${route.params.equipName}_${name.toUpperCase()}_(${route.params.type})`
+      const fileUri = FileSystem.cacheDirectory + fileName + '_Rev.0.xlsx'
 
       wb.xlsx.writeBuffer().then((buffer) => {
 
@@ -118,6 +132,7 @@ export default props => {
           encoding: FileSystem.EncodingType.Base64
         }).then(async () => {
           setExcel(fileUri)
+          setB64Excel(buffer)
 
           Toast.show({
             type: 'success',
@@ -129,6 +144,7 @@ export default props => {
     })
   }
 
+  //CRIA O CABEÇARIO DO INVENTARIO
   const creatHeardInvetario = (wb, ws) => {
     const claroImg = addImageB64(wb, claroLogo)
     const nokiaImg = addImageB64(wb, nokiaLogo)
@@ -149,7 +165,7 @@ export default props => {
       'DATA INÍCIO PROJETO',
       'DATA TÉRMINO PROJETO'
     ]
-    const sizes =[20,15,15,25,20,60,25,11,15,15,10,10,10,10,10]
+    const sizes = [20, 15, 15, 25, 20, 60, 25, 11, 15, 15, 10, 10, 10, 10, 10]
     //COLOCANDO NOME INVENTARIO E IMAGENS
     mergeCells(ws, 'A1', 'O1')
     let row = ws.getRow(1)
@@ -189,7 +205,7 @@ export default props => {
     row.height = 60.5
 
     cols.forEach((i, index) => {
-      
+
       let cell = ws.getCell(i + '3')
       let column = ws.getColumn(i)
       column.width = sizes[index]
@@ -206,6 +222,7 @@ export default props => {
     ///FIM--------------------
   }
 
+  //ADICIONA INTEM NO INVENTARIO
   const addItemInventario = async (wb, ws, wsFoto) => {
     const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O']
     let rows = 4
@@ -224,40 +241,71 @@ export default props => {
     let imgCol = 1
     let imgRow = 5
     wsFoto.getCell('P1').value = ' '
-    listFotos.forEach((item, index) => {
+
+    ///ADICIONA INTENS VAZIO SE A LISTA FOR MENOR QUE 9 ITENS
+    let copyList = [...listFotos]
+    if (listFotos.length < 9) {
+
+      for (var i = 0; i < 9 - listFotos.length; i++) {
+
+        copyList.push({
+          id: Math.random(),
+          modelo: null,
+          pn: ' ',
+          desc: ' ',
+          sap: ' ',
+          numSerie: ' ',
+          imgNumSerie: ' ',
+          numBPSGP: ' ',
+          imgNumBPSGP: ' ',
+          imgMain: null,
+          sfpEquip: ' '
+
+        })
+      }
+
+    }
+
+    //PEGA A LISTA DE FOTOS E ADICIONA NA PLANILHA 
+    copyList.forEach((item, index) => {
+
+      //ADICONA OS ITEM DA PRIMEIRA LISTA 
+
+      //separa cada item e verifica o que tem e não tem
       const dataItens = [
-        route.params.title,
-        'NE',
-        item.sfpEquip ? item.sfpEquip : item.modelo,
+        //NOME DO SITE
+        item.modelo ? route.params.title : ' ',
+        //REGIONAL
+        item.modelo ? 'NE' : ' ',
+        //TIPO DE EQUIPAMENTO 
+        item.modelo ? route.params.equipName : ' ',//item.sfpEquip ? item.sfpEquip : item.modelo,
+        //PART NUMBER
         item.pn,
+        //NÚMERO DE SERIE
         item.numSerie,
+        //DESCRIÇÃO
         item.desc,
-        item.numBPSGP ? item.numBPSGP : 'SEM BP',
-        'N/A',
+        //NUMERO DO BP/SGP
+        item.numBPSGP ? item.numBPSGP : 'NÃO ETIQUETAVEL',
+        //NOTA FISCAL COMPRA
+        item.modelo ? 'N/A' : ' ',
+        //CÓDIGO SAP
         item.sap,
-        'NOKIA',
+        //FORNECEDOR
+        item.modelo ? 'NOKIA' : ' ',
         ' ', ' ', ' ', ' ', ' '
       ]
 
-      //ADICIONA ITEM NA PRIMEIRA PLANILHA
+      //PERCORRE CADA COLUNA DE A - O
       cols.forEach((c, index) => {
-
         let gCell = ws.getCell(c + rows)
-        //let gCols = ws.getColumn(c)
-        //let widthCol = dataItens[index].toString().length
-
         gCell.value = dataItens[index]
         gCell.font = { size: 10, }
         gCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-
-        //let beforWidth = ws.getCell(c + (rows - 1)).value ? ws.getCell(c + (rows - 1)).value.toString().length : 10
-        //let maxWidth = widthCol > beforWidth ? widthCol : beforWidth
-
-        //gCols.width = maxWidth < 10 ? 10 : maxWidth + 4
         addBorderInventario(ws, c + rows)
       })
 
-      //ADICIONA ITEM NA SEGUNDA 
+      //ADICIONA ITEM NA SEGUNDA --------------------------------
       let start = linhas[controle][0] + (number[0])
       let end = linhas[controle][1] + number[1]
 
@@ -267,18 +315,50 @@ export default props => {
       wsFoto.getCell('N2').value = route.params.title
       wsFoto.getCell('N2').font = { size: 10, color: { argb: 'FF0000' } }
 
-      let img = addImageB64(wb, item.imgMain.b64)
-      
       mergeCells(wsFoto, start, end)
       addBorder(wsFoto, linhas[controle][0] + (number[0]))
 
-      wsFoto.addImage(img, {
-        tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
-        ext: { height: 216, width: 233 },
-        editAs: 'undefined'
-      })
+      //console.log('GE ADDINV - ITEM ', Object.keys(item.imgMain))
+      console.log('------------------------------')
+      //ADICIONA A IMAGEM PROPORCIONALMENTE
+      if (item.imgMain !== null) {
+        console.log('GE ADDINV - ITEM ', item.imgMain.width)
+        let img = addImageB64(wb, item.imgMain.b64)
 
-      //legendas do imagem 
+        //TAMANHO DO QUADRADO NA PLANILHA
+        let height = 216
+        let width = 233
+
+        //PORCENTAGEM DE REDUÇÃO DA ALTURA E LARGURA 
+        //DO TAMANHO ORIGINAL DA IMAGEM
+        let porcentH = ((height * 100) / item.imgMain.height) / 100
+        let porcentW = ((width * 100) / item.imgMain.width) / 100
+
+        //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
+        let quemEmaior = (item.imgMain.height > item.imgMain.width) ? true : false
+
+        //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
+        if (quemEmaior) {
+          width = item.imgMain.width * porcentH
+
+        }
+        //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
+        else {
+          height = item.imgMain.height * porcentW
+        }
+
+        //ADICIONA A FOTO COM AS MEDIDAS CERTAS
+        wsFoto.addImage(img, {
+          tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+          ext: {
+            height: height,
+            width: width
+          },
+          editAs: 'undefined'
+        })
+      }
+
+      //LEGENDAS DA IMAGEM SUAS BORDAS 
       mergeCells(wsFoto, legLinhas[controle][0] + (number[0] + 13), legLinhas[controle][2] + (number[0] + 13))
       let pnL1 = wsFoto.getCell(legLinhas[controle][0] + (number[0] + 13))
       pnL1.value = 'P/N'
@@ -330,7 +410,7 @@ export default props => {
         bottom: { style: 'thin', color: { argb: '000000' } },
         right: { style: 'thin', color: { argb: '000000' } }
       }
-
+      //-----------------------------------------
       rows += 1
       if (controle === 3) {
         imgRow += 17
@@ -342,8 +422,11 @@ export default props => {
       imgCol === 11 ? imgCol = 1 : imgCol += 5
 
     })
+
+
   }
 
+  //INICIALIZA A CRIAÇÃO DO INVENTARIO
   const gerarInventario = async () => {
     setProgress(true)
     setTimeout(() => {
@@ -363,11 +446,31 @@ export default props => {
 
   }
 
-  const getAllImage = (list) => {
+  //PEGA AS IMAGENS E DEIXA SO O CODIGO BASE6
+  const getAllImage = () => {
 
-    let newList = list.filter((l) => l.b64 && true)
+    const listType = route.params.inventario ? 'imgMain' : 'img'
+    let newList = []
+    listFotos.forEach((file, index) => {
 
-    setListFotos(newList)
+      if (file[listType]) {
+
+        let b64Img = file[listType].b64.replace('data:image/png;base64', '')
+
+        if (file['imgNumSerie'] && file['imgNumBPSGP']) {
+
+          let imgNumSerie = file['imgNumSerie'].b64.replace('data:image/png;base64', '')
+          let imgNumBPSGP = file['imgNumBPSGP'].b64.replace('data:image/png;base64', '')
+          newList.push({ img: imgNumBPSGP, name: index + 'A' })
+          newList.push({ img: imgNumSerie, name: index + 'B' })
+        }
+        newList.push({ img: b64Img, name: index })
+      }
+
+    })
+    return (newList)
+
+
   }
 
   const downloadExcel = useCallback(async (fileUri) => {
@@ -395,7 +498,7 @@ export default props => {
     }
   }
 
-
+  //ZERA TODO OS ARQUIVOS
   const finalize = async () => {
     try {
       dispatch({
@@ -410,19 +513,29 @@ export default props => {
 
   }
 
+  //SALVA ARQUIVO DO RELATORIO SEM SER INVENTARIO
   const saveExcel = (nameDoc) => {
     return new Promise(async (resolve, reject) => {
-      const fileName = `Relatório_Fotográfico_`
-      //const pat = await MediaLibrary.getAlbumAsync('Relatorio')
+      //const fileName = `Relatório_Fotográfico_${route.params.equipName}`
+      const fileName = `Relatório_Fotográfico_${route.params.equipName}_${nameDoc.toUpperCase()}_(${route.params.type})`
+
+      //Relatório_Fotográfico_7705 SAR-X_CEAER13-RMP01_(Ampliação)_Rev.0
+
       //muda para dirotio para ficar permanente???
-      const fileUri = FileSystem.cacheDirectory + fileName + nameDoc.toUpperCase() + '.xlsx'
+
+      //SALVA NO CACHE DIRECTORY TEMPORARIAMENTE
+      const fileUri = FileSystem.cacheDirectory + fileName + '_Rev.0.xlsx'
+      //TRANSFORMA O ARQUIVO EXCEL EM BUFFER
+      console.log('GE SAVEEXCEK ', fileUri)
       workbook.xlsx.writeBuffer().then((buffer) => {
         // console.log(pat)
         // Do this to use base64 encoding
+        //CODIFICA PARA BASE64
         const nodeBuffer = NodeBuffer.from(buffer)
         const bufferStr = nodeBuffer.toString('base64')
+        setB64Excel(buffer)
 
-        //gravando arquivo
+        //SALVA O ARQUIVO NA MEMORIA TEMPORARIA
         FileSystem.writeAsStringAsync(fileUri, bufferStr, {
           encoding: FileSystem.EncodingType.Base64
         }).then(async () => {
@@ -506,18 +619,55 @@ export default props => {
 
 
 
-      if (element.b64) {
-        //ADDICIONANDO FOTOS 
+      if (element.img) {
+        //ADDICIONANDO FOTOS
+
         let foto = workbook.addImage({
-          base64: element.b64,
+          base64: element.img.b64,
           extension: 'jpg',
         })
-        //console.log('GERADOR',element.width)
-        worksheet.addImage(foto, {
-          tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
-          ext: { height: 216, width: 233 },
-          editAs: 'undefined'
-        })//(`${linhas[controle][0] + number[0]}:${linhas[controle][1] + number[1]}`))
+
+
+        if (element.img.b64) {
+          //let img = addImageB64(workbook, element.b64)
+          //TAMANHO DO QUADRADO NA PLANILHA
+          let height = 216
+          let width = 233
+
+          //PORCENTAGEM DE REDUÇÃO DA ALTURA E LARGURA 
+          //DO TAMANHO ORIGINAL DA IMAGEM
+          let porcentH = ((height * 100) / element.img.height) / 100
+          let porcentW = ((width * 100) / element.img.width) / 100
+
+          //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
+          let quemEmaior = (element.img.height > element.img.width) ? true : false
+
+          //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
+          if (quemEmaior) {
+            width = element.img.width * porcentH
+
+          }
+          //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
+          else {
+            height = element.img.height * porcentW
+          }
+
+          //ADICIONA A FOTO COM AS MEDIDAS CERTAS
+          worksheet.addImage(foto, {
+            tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+            ext: {
+              height: height,
+              width: width
+            },
+            editAs: 'undefined'
+          })
+        }
+
+        // worksheet.addImage(foto, {
+        //   tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+        //   ext: { height: 216, width: 233 },
+        //   editAs: 'undefined'
+        // })//(`${linhas[controle][0] + number[0]}:${linhas[controle][1] + number[1]}`))
 
       } else {
         fotoContainer.value = 'N/A'
@@ -544,20 +694,115 @@ export default props => {
     if (listFotos.length === 0) return (alert("NÃO TEM FOTOS NO RELATÓRIO"))
 
     setProgress(true)
-    creatHeard(route.params.title)
-    addFotos(listFotos)
-    // worksheet.pageSetup.printArea = 'A1:P72'
-    //worksheet.pageSetup.printArea = 'A1:P72&&A73:P140&&A141:P208&&A209:P276&&A77:P344&&A345:378'
-    //salva arquivo como excel
-    saveExcel(route.params.title).then((e) => {
-      setProgress(false)
-    })
+    setTimeout(() => {
+      creatHeard(route.params.title)
+      addFotos(listFotos)
+
+      // worksheet.pageSetup.printArea = 'A1:P72'
+      //worksheet.pageSetup.printArea = 'A1:P72&&A73:P140&&A141:P208&&A209:P276&&A77:P344&&A345:378'
+
+      //salva arquivo como excel
+      saveExcel(route.params.title).then((e) => {
+        setProgress(false)
+      })
+     }, 1 * 1000)
+
 
 
   }
 
+  const zipFiles = async () => {
+    return new Promise(async (resolve, reject) => {
+      const typeDoc = route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'
+      const name = `${typeDoc}_${route.params.equipName}_${route.params.title.toUpperCase()}_(${route.params.type})`
+      let fileUri = FileSystem.cacheDirectory + name + '.zip'
+      const imgs = getAllImage()
+      const nodeBuffer = NodeBuffer.from(b64Excel)
+      const bufferStr = nodeBuffer.toString('base64')
+
+
+      //ADICIONA AS FOTOS NO ARQUIVO 
+
+
+
+      let fotos = zip.folder("FOTOS")
+      for (const item of imgs) {
+
+        if (item) {
+          fotos.file(`${item.name}.jpg`, item.img, { base64: true })
+        }
+      }
+
+      //ADICIONA O EXCEL NO ARQUIVO ZIP
+      zip.file(name + '.xlsx', bufferStr, { base64: true })
+
+      if (route.params.dePara) {
+        let textDePara = []
+        const text = route.params.dePara.map((item, index) => {
+          return (`${index + 1}. DE ${item.de} <> PARA ${item.para}\n`)
+        })
+        zip.file('DePara.txt', text.toString())
+
+      }
+
+      //CRIA O ARQUIVO ZIP
+      zip.generateAsync({ type: "base64" }).then(function (base64) {
+        //console.log(base64)
+        //saveAs(base64, "hello.zip")
+        FileSystem.writeAsStringAsync(fileUri, base64, {
+          encoding: FileSystem.EncodingType.Base64
+        }).then(async () => {
+          //converte o pdf
+
+          setFileZip(fileUri)
+          resolve(fileUri)
+          setProgress(false)
+          //alert('ARQUIVO GERADO COM SUCESSO')
+
+        })
+
+        // location.href="data:application/zip;base64," + base64;
+      });
+
+    })
+
+    //Sharing.shareAsync( promise)
+  }
+
   const shareExcel = async () => {
     //const shareableExcelUri = await generateExcel();
+    setProgress(true)
+    setTimeout(async () => {
+      const file = await zipFiles()
+      if (file) {
+        setProgress(false)
+        Sharing.shareAsync(file)
+      }
+      else {
+        setProgress(false)
+      }
+    }, 1 * 1000)
+
+    // Sharing.shareAsync(excel, {
+    //   mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // Android
+    //   dialogTitle: 'RELATORIO FEITO COMPARTILHAR COM?', // Android and Web
+    //   UTI: 'com.microsoft.excel.xlsx' // iOS
+    // }).catch(error => {
+    //   console.error('Error', error);
+    // }).then(() => {
+    //   console.log('Return from sharing dialog');
+    // });
+  }
+
+  const shareExcelOnly = async () => {
+    //const shareableExcelUri = await generateExcel();
+    // setProgress(true)
+    // const file = await zipFiles()
+    // if (file) {
+    //   setProgress(false)
+    //   Sharing.shareAsync(file)
+    // } 
+
     Sharing.shareAsync(excel, {
       mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // Android
       dialogTitle: 'RELATORIO FEITO COMPARTILHAR COM?', // Android and Web
@@ -567,6 +812,56 @@ export default props => {
     }).then(() => {
       console.log('Return from sharing dialog');
     });
+  }
+
+  const sendEmail = async () => {
+    const mailerConfig = {
+      defaults: {
+        from: {
+          name: "Check Report App",
+          address: "checkreportapp@gmail.com"
+        }
+      },
+      transport: {
+        host: "smtp.gmail.com",
+        secure: true,
+        auth: {
+          user: "checkreportapp@gmail.com",
+          pass: "17132023"
+        }
+      }
+    };
+
+    const emailsList = {
+      //PasswordEmail,
+      ReminderEmail,
+    }
+
+    const ReminderEmail = () => ({
+      subject: `Don't forget!`,
+      body: (
+        <div>
+          <p>Hello ,</p>
+          <p>You asked me to remind you about !</p>
+          <p>See you!</p>
+        </div>
+      ),
+    })
+
+    // const mailer = Mailer(mailerConfig,emailsList);
+
+    // mailer.send(
+    //   'ReminderEmail',
+    //   {
+    //     firstName: "Mathieu",
+    //     task: 'Write package documentation!',
+    //   },
+    //   {
+    //     to: "bydavid16@gmail.com",
+    //     //attachments: [{ content: "bar", filename: "foo.txt" }]
+    //   }
+    // );
+
   }
 
   return (
@@ -632,7 +927,17 @@ export default props => {
         mode='contained'
         color="#2196f3"
       >
-        Compartilhar
+        enviar Excel e fotos
+      </Button>
+
+      <Button
+        disabled={!excel}
+        style={[styles.button]}
+        onPress={shareExcelOnly}
+        mode='contained'
+        color="#2196f3"
+      >
+        Enviar Excel
       </Button>
       {true &&
         <Button

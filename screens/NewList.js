@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react'
-import { Text, SafeAreaView, StyleSheet, FlatList, View, TouchableOpacity } from 'react-native'
+import React, { useEffect, useState, useContext, useRef } from 'react'
+import { Text, SafeAreaView, StyleSheet, FlatList, View, TouchableOpacity, Modal } from 'react-native'
 import Item from '../components/Item'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { ListContext } from '../contexts/listContexts'
@@ -7,17 +7,27 @@ import { Ionicons } from '@expo/vector-icons'
 //import * as Sharing from 'expo-sharing'
 import * as ImagePicker from 'expo-image-picker'
 import MyTextInput from '../components/MyTextInput'
-import { IconButton, } from 'react-native-paper'
+import { IconButton, List, Searchbar, RadioButton, TextInput, Button } from 'react-native-paper'
 import Constants from 'expo-constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu'
 import Toast from 'react-native-toast-message'
+import { ROT, SFP } from '../ROT-FPS'
+
 
 export default props => {
-  //const { otherParam , title} = props.route.params  
+  //const { otherParam , title} = props.route.params
+  const modalizeRef = useRef(null);
   const [name, setName] = useState('')
   const [visible, setVisible] = useState(false)
-  const [hasPermission, setHasPermission] = useState(null)
+  const [dePara, setDePara] = useState(null)
+  const [equipamentos, setEquipamentos] = useState(ROT)
+  const [equipamento, setEquipamento] = useState(null)
+  const [expanded, setExpanded] = useState(false)
+  const [expandedDePara, setExpandedDePara] = useState(false)
+  const [textDe, setTextDe] = React.useState("");
+  const [textPara, setTextPara] = React.useState("")
+  const [modalDePara, setModalDePara] = useState(false)
 
   //pega a lista pelo reducer 
   const { state, dispatch } = useContext(ListContext)
@@ -30,16 +40,16 @@ export default props => {
   //pega permisão do usuario par atirar foto
   useEffect(() => {
 
-    (async () => {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-      setHasPermission(status === 'granted');
-    })()
+
 
   }, [])
 
   //MOSTRA A LISTA ATUAL
   useEffect(() => {
-    //console.log('NL',state[route.params.listName])
+   
+    //
+    //setDePara(newDePara)
+    //console.log('NL',state[route.params.listName][route.params.listName.length])
     setLista(state[route.params.listName])
   }, [state])
 
@@ -60,7 +70,29 @@ export default props => {
 
   //VAI PARA A TELA DE GERAR EXCEL
   const pressGerar = () => {
-    navigation.navigate('GeradorExcel', { list: route.params.listName, title: route.params.title })
+    hideMenu()
+    if (equipamento && dePara) {
+      navigation
+        .navigate(
+          'GeradorExcel',
+          {
+            list: route.params.listName,
+            title: route.params.title,
+            type: route.params.type,
+            equipName: equipamento['MODELO'],
+            dePara: dePara
+
+
+          })
+      return
+    }
+
+    hideMenu()
+    Toast.show({
+      type: 'info',
+      text1: 'VERIFIQUE SE SELECIONOU',
+      text2:`- EQUIPAMENTO e o DE<>PARA`
+    })
   }
 
   //REMOVE A FOTO DE UM ITEM
@@ -76,6 +108,12 @@ export default props => {
   //SALVA AS IMAGEM ATUAL NO APARELHO
   const saveData = async (name, item) => {
     try {
+      // const site = {
+      //   dePara:dePara,
+      //   equipamento: equipamento['MODELO'],
+      //   list:item
+      // }
+
       const jItem = JSON.stringify(item)
       await AsyncStorage.setItem('@' + name, jItem)
       Toast.show({
@@ -122,6 +160,20 @@ export default props => {
 
   //MOSTRA MEN
   const showMenu = () => setVisible(true);
+  const handlePress = () => setExpanded(!expanded)
+  const handlePressDePara = () => setExpandedDePara(!expandedDePara)
+  //REDUZ A LISTA DE ACORDO COM A PESQUISA
+  const onChangeSearch = (query, t) => {
+    let equip = ROT.filter(item => item['MODELO'].includes(query) || item['PN'].includes(query))
+    setEquipamentos(equip)
+  }
+
+
+  const pressSelectEquip = (equip) => {
+    setEquipamento(equip)
+    handlePress()
+  }
+
 
   //RETORNA PARA TELA ANTERIOR
   const pressArrow = () => {
@@ -133,6 +185,37 @@ export default props => {
 
   }
 
+  const handleDeParaAdd = () => {
+    const newDePara = dePara?[...dePara]:[]
+    if (textDe && textPara) {
+      newDePara.push(
+        {
+          de: textDe,
+          para: textPara
+        }
+      )
+      setDePara(newDePara)
+      setModalDePara(false)
+    }else{
+      Toast.show({
+        type: 'info',
+        text1: 'PREENCHA TODOS OS CAMPOS'
+      })
+    }
+
+  }
+
+  const removeDePara = (file)=>{
+    const newDePara = dePara.filter((item)=>item.de !== file.de)
+    setDePara(newDePara)
+  }
+
+  const onOpen = () => {
+    setTextDe('')
+    setTextPara("")
+    setModalDePara(true)
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.barra}>
@@ -140,48 +223,95 @@ export default props => {
           icon='arrow-left'
           size={26}
           onPress={pressArrow} /> */}
-        <Text style= {{flex:1, textAlign:"center"}}>{route.params.title}</Text>
+        <Text style={{ flex: 1, textAlign: "center" }}>{route.params.title}</Text>
         <View style={{ flexDirection: 'row' }}>
           <Menu
             visible={visible}
             anchor={<IconButton icon='menu' size={26} onPress={showMenu} />}
             onRequestClose={hideMenu}
           >
-            <MenuItem onPress={pressSave}><Text>Salvar</Text></MenuItem>
+            {
+              //esta dando erro quando tem muitas fotos
+              //<MenuItem onPress={pressSave}><Text>Salvar</Text></MenuItem>
+            }
             <MenuItem onPress={pressGerar}>Gerar Excel</MenuItem>
             <MenuItem onPress={pressClear}>Limpar</MenuItem>
-            <MenuDivider/>
+            <MenuDivider />
             <MenuItem onPress={pressFinalizar}>Finalizar</MenuItem>
           </Menu>
         </View>
 
       </View>
 
-      {route.params.title === 'EM BRANCO' &&
-        <View style={styles.inputContatiner}>
-          <MyTextInput
-            title={'LEGENDA DA FOTO'}
-            value={name}
-            placeholder='EX:ENTRADA DO SITE'
-            onChangeText={(t) => setName(t)}
+
+      <List.Section>
+        <List.Accordion
+          style={{ backgroundColor: 'white', elevation: 2 }}
+          title={'DE <> PARA'}
+          id={0}
+          expanded={expandedDePara}
+          onPress={handlePressDePara}
+        >
+          <Button color='#2196f3' icon="plus" mode="contained" onPress={onOpen}>
+            ADICIONAR
+          </Button>
+
+          <FlatList
+            data={dePara}
+            style={{ flexGrow: 1, backgroundColor: 'white', paddingBottom: 0, }}
+            initialNumToRender={12}
+            contentContainerStyle={{ padding: 10, paddingBottom: 20, }}
+            showsVerticalScrollIndicator={false}
+            //ListFooterComponent={() => <Text style={styles.logo}>FROM MSTUDIO</Text>}
+            renderItem={({ item }) => (
+              <List.Item
+                key = {Math.random()}
+                titleStyle={{ fontSize: 11 }}
+                title={`DE: ${item.de} PARA: ${item.para}`}
+                left={props => <IconButton {...props} icon="delete" size={26} onPress={() => removeDePara(item)} />}
+              />
+            )}
+            keyExtractor={item => Math.random()}
           />
-          <View style={{ flexDirection: 'row' }}>
-            <Button
-              style={styles.button}
-              onPress={addItemList}
-              mode='contained'
-              color="#2196f3"
-            >
-              ADICIONA
-            </Button>
-          </View>
-        </View>
-      }
+        </List.Accordion>
+
+        <List.Accordion
+          style={{ backgroundColor: 'white', elevation: 2 }}
+          title={equipamento ? equipamento['MODELO'] : 'SELECIONE O EQUIPAMENTO'}
+          id={1}
+          expanded={expanded}
+          onPress={handlePress}
+        >
+          <Searchbar
+            style={{ elevation: 2, }}
+            placeholder="Search"
+            onChangeText={onChangeSearch}
+            autoCapitalize={"characters"}
+          />
+          <FlatList
+            data={equipamentos}
+            style={{ flexGrow: 1, backgroundColor: 'white', paddingBottom: 100, }}
+            initialNumToRender={12}
+            contentContainerStyle={{ padding: 10, paddingBottom: 100, }}
+            showsVerticalScrollIndicator={false}
+            ListFooterComponent={() => <Text style={styles.logo}>FROM MSTUDIO</Text>}
+            renderItem={({ item }) => (
+              <List.Item
+                title={`${item["MODELO"]} | ${item['PN']}`}
+                description={`${item["DESCRIÇÃO"]}`}
+                onPress={() => pressSelectEquip(item)}
+              />
+            )}
+            keyExtractor={item => item.id}
+          />
+        </List.Accordion>
+      </List.Section>
+
       <FlatList
         data={lista}
         style={{ flexGrow: 1 }}
         initialNumToRender={12}
-        contentContainerStyle={{ padding: 10, paddingBottom: 20, }}
+        contentContainerStyle={{ padding: 10, paddingBottom: 100, }}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={() => <Text style={styles.logo}>FROM MSTUDIO</Text>}
         renderItem={({ item }) => (
@@ -190,6 +320,50 @@ export default props => {
         keyExtractor={item => item.id}
       />
 
+      <Modal
+        transparent={true}
+        visible={modalDePara}
+        animationType='fade'
+        statusBarTranslucent
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalDePara}>
+            <IconButton
+              icon='close'
+              color='white'
+              size={26}
+              onPress={() => setModalDePara(false)}
+            />
+            <Text style={{ fontWeight: 'bold', color: 'white', }}>ADICIONAR DE - PARA</Text>
+          </View>
+          <View style={{ height: 300, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center' ,width:"90%",}}>
+
+            <TextInput
+              style={{
+                color: 'white', width: '75%', height: 50, marginBottom: 10
+              }}
+              label="De"
+              value={textDe}
+              onChangeText={text => setTextDe(text)}
+            />
+            <TextInput
+              style={{
+                color: 'white', width: '75%', height: 50, marginBottom: 32
+              }}
+              label="Para"
+              value={textPara}
+              onChangeText={text => setTextPara(text)}
+            />
+            <Button
+              color='#2196f3'
+              icon="plus"
+              mode="contained"
+              onPress={handleDeParaAdd}>
+              ADICIONAR
+            </Button>
+          </View>
+        </View>
+      </Modal>
 
     </View>
 
@@ -238,11 +412,33 @@ const styles = StyleSheet.create({
     marginTop: 16
   },
   logo: {
-    height: 80,
+    height: 150,
     width: '100%',
     alignItems: 'center',
     textAlign: 'center'
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    //paddingTop: Constants.statusBarHeight,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems:'center'
+    //padding: 8,
+
+  },
+  modalDePara: {
+    flexDirection: 'row',
+    backgroundColor: '#2196f3',
+    borderBottomWidth: 1,
+    borderBottomColor: 'gray',
+    height: 48,
+    borderTopEndRadius: 20,
+    borderTopStartRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width:'90%'
+    
+  }
 });
 
 

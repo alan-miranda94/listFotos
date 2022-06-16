@@ -28,7 +28,7 @@ const MyComponent = props => {
 
   const pressButton = async ()=>{
     //console.log(props.site)
-    const list = await openData(props.site)
+    const site = await openData(props.site)
     let title= props.site.replace('@','')
     const isInvetario = title.includes('inventario')
     console.log(isInvetario)
@@ -37,7 +37,7 @@ const MyComponent = props => {
       type: 'galeria',
       payload: {
         list: isInvetario?'inventario':'galeria',
-        site: list
+        site: site
       }
     })
 

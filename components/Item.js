@@ -8,6 +8,7 @@ import * as MediaLibrary from 'expo-media-library'
 import { ListContext } from '../contexts/listContexts'
 import * as FileSystem from 'expo-file-system'
 import * as ImageManipulator from 'expo-image-manipulator'
+import AvatarImage from './AvatarImage'
 
 const MyComponent = props => {
   const [expanded, setExpanded] = useState(true)
@@ -21,11 +22,12 @@ const MyComponent = props => {
 
   useEffect(() => {
     if (props.data.img) {
-     
-      setImage(props.data.b64.toString())
-
+      //console.log(props.data.img.path)
+     // setImage(props.data.img.b64.toString())
+      
     }
-    //console.log('ITEM 2',props.data.image)
+    
+   
   }, [props.data])
 
 
@@ -37,16 +39,19 @@ const MyComponent = props => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       //aspect: [1, 1],
-      quality: .7,
+      quality: .8,
     }
     const result = await ImagePicker.launchCameraAsync(options)
 
     if (!result.cancelled) {
+
+      savePicture(result.uri)
+
       resize = await ImageManipulator.manipulateAsync(
         result.uri,
-        [{ resize: { width: result.width * 0.5 } }],
+        [{ resize: { width: result.width * 0.6 } }],
         {
-          compress: 0.7,
+          compress: .8,
           format: ImageManipulator.SaveFormat.JPEG,
           base64: true
         },
@@ -57,7 +62,7 @@ const MyComponent = props => {
       setImage(resize.uri)
       setImgHeight(resize.height)
       setImgWidth(resize.width)
-      savePicture(resize.uri, props.data.id, b64)
+      sendImageToList(props.data.id, resize)
 
     }
   }
@@ -71,7 +76,7 @@ const MyComponent = props => {
       allowsEditing: true,
       //base64: true,
       //aspect: [1, 1],
-      quality: .7,
+      quality: .8,
     }
     const result = await ImagePicker.launchImageLibraryAsync(options)
 
@@ -79,43 +84,61 @@ const MyComponent = props => {
       //DIMINUI O TAMANHO DA IMAGEM PARA 50%
       resize = await ImageManipulator.manipulateAsync(
         result.uri,
-        [{ resize: { width: result.width * 0.5 } }],
+        [{ resize: { width: result.width * 0.8 } }],
         {
-          compress: 0.7,
+          compress: .8,
           format: ImageManipulator.SaveFormat.JPEG,
           base64: true
         },
       )
 
-
       b64 = resize.base64 //await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' })
       setImage(resize.uri)
+      const newItem = {
+        id: props.data.id,
+        path: result.uri,
+        width: resize.width,
+        height: resize.height,
+        b64: `data:image/png;base64,${b64}`
+      }
 
 
       dispatch({
         type: 'take',
         payload: {
           list: props.list,
-          item: {
-            id: props.data.id,
-            img: result.uri,
-            width: resize.width,
-            height: resize.height,
-            b64: `data:image/png;base64,${b64}`
-          }
+          item: newItem
         }
       })
       //savePicture(result.uri,props.data.id, b64)
     }
   }
 
+  const sendImageToList = (id, data) => {
+    //chama o dispatch aqui depois que salvar na galeria
+    //console.log('ITEM SEND IMAGE TO LIST', data)
+    dispatch({
+      type: 'take',
+      payload: {
+        list: props.list,
+        item: {
+          id: id,
+          width: data.width,
+          height: data.height,
+          path: data.uri,
+          b64: `data:image/png;base64,${data.base64}`
+        }
+      }
+    })
+  }
 
   //SALVA A IMAGEM DA CAMERA NA GALERIA
-  const savePicture = async (picture, id, base64) => {
+  const savePicture = async (picture) => {
     try {
       const asset = await MediaLibrary.createAssetAsync(picture)
       const existAlbum = await MediaLibrary.getAlbumAsync(props.site)
 
+      //console.log('TO NA SAVE PICTURE', existAlbum)
       //verifica se o album existe e move a imagem para o existente
       if (existAlbum !== null) {
         await MediaLibrary.addAssetsToAlbumAsync(asset, existAlbum.id, false)
@@ -124,20 +147,7 @@ const MyComponent = props => {
       }
 
       //MediaLibrary.deleteAssetsAsync(asset) 
-      //chama o dispatch aqui depois que salvar na galeria
-      dispatch({
-        type: 'take',
-        payload: {
-          list: props.list,
-          item: {
-            id: id,
-            width: imgWidth,
-            height: imgHeight,
-            img: picture,
-            b64: `data:image/png;base64,${base64}`
-          }
-        }
-      })
+
       //navigation.navigate('NewList')        
     } catch (error) {
       console.error(error)
@@ -170,8 +180,8 @@ const MyComponent = props => {
           </TouchableOpacity>
         }
 
-        {props.data.b64 &&
-          <Avatar.Image size={42} source={{ uri: props.data.b64 }} />
+        {props.data.img &&props.data.img.b64 &&
+          <AvatarImage source={props.data.img.b64 } />
         }
         <View style={{ width: '65%' }}>
           <Text style={styles.texto} numberOfLines={2}>{props.data.title}</Text>

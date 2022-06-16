@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { List, Avatar, Colors } from 'react-native-paper';
-import { Text, View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import * as ImagePicker from 'expo-image-picker'
@@ -8,16 +8,16 @@ import * as MediaLibrary from 'expo-media-library'
 import { ListContext } from '../contexts/listContexts'
 import * as FileSystem from 'expo-file-system'
 import * as ImageManipulator from 'expo-image-manipulator'
+import AvatarImage from './AvatarImage'
 
 
 const MyComponent = props => {
   const [expanded, setExpanded] = useState(false)
-
-  const [image, setImage] = useState(props.data.img ? props.data.img : null)
+  const [modalImage, setModalImage] = useState(false)
   const { state, dispatch } = useContext(ListContext)
 
   useEffect(() => {
-  
+
     //console.log(props.data)
   }, [])
 
@@ -29,8 +29,8 @@ const MyComponent = props => {
       type: 'removeItemInventario',
       payload: {
         list: 'inventario',
-        item: {...props.data}
-        
+        item: { ...props.data }
+
       }
     })
   }
@@ -44,14 +44,12 @@ const MyComponent = props => {
           </TouchableOpacity>
         }
         {props.data.imgMain &&
-          <TouchableOpacity style={{ marginHorizontal: 4 }}onPress={() => alert("AVATAR")}  >
-            <Avatar.Image size={42} source={{ uri: props.data.imgMain.b64 }} />
-          </TouchableOpacity>
+          <AvatarImage source={props.data.imgMain.b64}/>
         }
         <Text style={{ flex: 1, marginHorizontal: 8 }}> {props.data.modelo + ' | ' + props.data.pn}</Text>
       </View >
       {expanded &&
-        <View style={{ flexDirection: "column", paddingHorizontal: 16, paddingVertical: 8, borderColor:'gray',borderTopWidth: 1 }}>
+        <View style={{ flexDirection: "column", paddingHorizontal: 16, paddingVertical: 8, borderColor: 'gray', borderTopWidth: 1 }}>
           <Text style={styles.texto}>NS: {props.data.numSerie}</Text>
           <Text style={styles.texto}>DESC: {props.data.desc}</Text>
           <Text style={styles.texto}>BP/SGP: {props.data.numBPSGP}</Text>
@@ -98,8 +96,16 @@ const styles = StyleSheet.create({
   barra: {
     height: 6,
     backgroundColor: '#39FF14'
-  }
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    //paddingTop: Constants.statusBarHeight,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center'
+    //padding: 8,
 
+},
 });
 
 export default MyComponent;

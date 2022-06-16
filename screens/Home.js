@@ -52,7 +52,7 @@ const App = props => {
         mode='contained'
         color='#ffea00'
         icon='folder-multiple-image'
-        disabled={false}
+        disabled={true}
 
       >
         GALERIA

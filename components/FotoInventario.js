@@ -8,6 +8,7 @@ import * as MediaLibrary from 'expo-media-library'
 import { ListContext } from '../contexts/listContexts'
 import * as FileSystem from 'expo-file-system'
 import * as ImageManipulator from 'expo-image-manipulator'
+import AvatarImage from './AvatarImage'
 
 const MyComponent = props => {
   const [expanded, setExpanded] = useState(true)
@@ -20,10 +21,8 @@ const MyComponent = props => {
 
 
   useEffect(() => {
-    if (props.data.img) {
-     
+    if (props.data.img) {     
       setImage(props.data.b64.toString())
-
     }
     //console.log('ITEM 2',props.data.image)
   }, [props.data])
@@ -37,16 +36,16 @@ const MyComponent = props => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       //aspect: [1, 1],
-      quality: .7,
+      quality: .8,
     }
     const result = await ImagePicker.launchCameraAsync(options)
 
     if (!result.cancelled) {
       resize = await ImageManipulator.manipulateAsync(
         result.uri,
-        [{ resize: { width: result.width * 0.5 } }],
+        [{ resize: { width: result.width * 0.6 } }],
         {
-          compress: 0.7,
+          compress: .8,
           format: ImageManipulator.SaveFormat.JPEG,
           base64: true
         },
@@ -57,7 +56,7 @@ const MyComponent = props => {
       setImage(resize.uri)
       setImgHeight(resize.height)
       setImgWidth(resize.width)
-      savePicture(resize.uri, b64)
+      savePicture(resize.uri, b64, resize)
 
     }
   }
@@ -71,7 +70,7 @@ const MyComponent = props => {
       allowsEditing: true,
       //base64: true,
       //aspect: [1, 1],
-      quality: .7,
+      quality: .8,
     }
     const result = await ImagePicker.launchImageLibraryAsync(options)
 
@@ -79,9 +78,9 @@ const MyComponent = props => {
       //DIMINUI O TAMANHO DA IMAGEM PARA 50%
       resize = await ImageManipulator.manipulateAsync(
         result.uri,
-        [{ resize: { width: result.width * 0.5 } }],
+        [{ resize: { width: result.width * 0.6 } }],
         {
-          compress: 0.7,
+          compress: .8,
           format: ImageManipulator.SaveFormat.JPEG,
           base64: true
         },
@@ -102,7 +101,7 @@ const MyComponent = props => {
 
 
   //SALVA A IMAGEM DA CAMERA NA GALERIA
-  const savePicture = async (picture,  base64) => {
+  const savePicture = async (picture,  base64, data) => {
     try {
       const name = props.site + '-inventario' 
       const asset = await MediaLibrary.createAssetAsync(picture)
@@ -116,33 +115,38 @@ const MyComponent = props => {
       }
 
       props.takeImage({
-        width: imgWidth,
-        height: imgHeight,
+        width: data.width,
+        height: data.height,
         img: picture,
         b64: `data:image/png;base64,${base64}`
       })
-      //MediaLibrary.deleteAssetsAsync(asset) 
-      // //chama o dispatch aqui depois que salvar na galeria
-      // dispatch({
-      //   type: 'take',
-      //   payload: {
-      //     list: props.list,
-      //     item: {
-      //       id: id,
-      //       width: imgWidth,
-      //       height: imgHeight,
-      //       img: picture,
-      //       b64: `data:image/png;base64,${base64}`
-      //     }
-      //   }
-      // })
-      //navigation.navigate('NewList')        
+          
     } catch (error) {
       console.error(error)
     }
 
 
   }
+
+  
+  const sendImageToList = ( id,data)=>{
+    //chama o dispatch aqui depois que salvar na galeria
+    //console.log('ITEM SEND IMAGE TO LIST', data)
+    dispatch({
+      type: 'take',
+      payload: {
+        list: props.list,
+        item: {
+          id: id,
+          width: data.width,
+          height: data.height,
+          img: data.uri,
+          b64: `data:image/png;base64,${data.base64}`
+        }
+      }
+    })
+  }
+
 
   //REMOVE IMAGEM DA LISTA 
   const pressRemove = () => {
@@ -161,7 +165,7 @@ const MyComponent = props => {
         }
 
         {props.image &&
-          <Avatar.Image size={42} source={{ uri: props.image}} />
+          <AvatarImage  source={props.image} />
         }
         <View style={{ width: '65%' }}>
           <Text style={styles.texto} numberOfLines={2}>{props.data.title}</Text>
