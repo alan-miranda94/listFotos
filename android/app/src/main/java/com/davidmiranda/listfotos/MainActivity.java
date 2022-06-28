@@ -1,4 +1,4 @@
-package com.listfotos;
+package com.davidmiranda.listfotos;
 
 import android.os.Build;
 import android.os.Bundle;

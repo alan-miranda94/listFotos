@@ -1,6 +1,6 @@
 {
   "name": "list-fotos",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client",
@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^12.0.0",
-    "@nozbe/watermelondb": "^0.24.0",
     "@react-native-async-storage/async-storage": "~1.15.0",
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/native-stack": "^6.5.0",

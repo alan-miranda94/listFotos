@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react'
-import { StyleSheet, View, Image, Text, Linking, WebView, Alert } from 'react-native'
+import { StyleSheet, View, Image, Text, Linking, WebView, Alert,Share } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { ListContext } from '../contexts/listContexts'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -19,6 +19,8 @@ import Toast from 'react-native-toast-message'
 import JSZip from 'jszip'
 //import { Mailer } from "nodemailer-react";
 import SMTP_CONFIG from "../config/smtp"
+
+
 
 export default props => {
   const navigation = useNavigation()
@@ -305,7 +307,7 @@ export default props => {
         addBorderInventario(ws, c + rows)
       })
 
-      //ADICIONA ITEM NA SEGUNDA --------------------------------
+      //ADICIONA ITEM NA SEGUNDA PAGINA --------------------------------
       let start = linhas[controle][0] + (number[0])
       let end = linhas[controle][1] + number[1]
 
@@ -322,7 +324,7 @@ export default props => {
       console.log('------------------------------')
       //ADICIONA A IMAGEM PROPORCIONALMENTE
       if (item.imgMain !== null) {
-        console.log('GE ADDINV - ITEM ', item.imgMain.width)
+        console.log('GE ADD INV - ITEM ', item.imgMain.width)
         let img = addImageB64(wb, item.imgMain.b64)
 
         //TAMANHO DO QUADRADO NA PLANILHA
@@ -356,6 +358,9 @@ export default props => {
           },
           editAs: 'undefined'
         })
+      }else{
+        wsFoto.getCell(start).value = ("NA")
+        wsFoto.getCell(start).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
       }
 
       //LEGENDAS DA IMAGEM SUAS BORDAS 
@@ -795,13 +800,6 @@ export default props => {
   }
 
   const shareExcelOnly = async () => {
-    //const shareableExcelUri = await generateExcel();
-    // setProgress(true)
-    // const file = await zipFiles()
-    // if (file) {
-    //   setProgress(false)
-    //   Sharing.shareAsync(file)
-    // } 
 
     Sharing.shareAsync(excel, {
       mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // Android
@@ -813,6 +811,23 @@ export default props => {
       console.log('Return from sharing dialog');
     });
   }
+
+  
+  const shareDePara = async () => {
+    let msg = ''
+    let dePara = route.params.dePara.forEach(item =>{
+      msg +=  `\nDE: ${item.de} PARA: ${item.para} `
+    })
+
+    const options = {
+      title: "DE <> PARA",
+      message: msg,
+   
+    }
+    await  Share.share(options)
+
+  }
+
 
   const sendEmail = async () => {
     const mailerConfig = {
@@ -939,6 +954,16 @@ export default props => {
       >
         Enviar Excel
       </Button>
+      { route.params.dePara&&
+      <Button
+        disabled={!excel}
+        style={[styles.button]}
+        onPress={shareDePara}
+        mode='contained'
+        color="#2196f3"
+      >
+        Enviar DE PARA
+      </Button>}
       {true &&
         <Button
           style={styles.button}
