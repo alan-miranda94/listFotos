@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { View, StyleSheet, } from 'react-native'
+import { View, StyleSheet,Text } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import Constants from 'expo-constants'
 import { Button, Checkbox } from 'react-native-paper'
@@ -52,13 +52,27 @@ const App = props => {
         mode='contained'
         color='#ffea00'
         icon='folder-multiple-image'
-        disabled={true}
+        disabled={false}
 
       >
         GALERIA
       </Button>
+      <Button
+        style={{ width: '100%', heigth: '10%', marginBottom: 10 }}
+        contentStyle={{ margin: 10 }}
+        onPress={() =>navigation.navigate('Endereços')}
+        mode='contained'
+        color='#ffea00'
+        icon='google-maps'
+        disabled={false}
 
+      >
+        ENDEREÇOS
+      </Button>
 
+      <Text style={{color:'white', alignItems:"center", justifyContent:"center"}}>
+        V.1.6.1
+      </Text>
     </View>
   );
 }

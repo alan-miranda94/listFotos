@@ -49,7 +49,7 @@ const MyComponent = props => {
 
       resize = await ImageManipulator.manipulateAsync(
         result.uri,
-        [{ resize: { width: result.width * 0.6 } }],
+        [{ resize: { width: result.width * 0.5 } }],
         {
           compress: .8,
           format: ImageManipulator.SaveFormat.JPEG,
@@ -76,7 +76,7 @@ const MyComponent = props => {
       allowsEditing: true,
       //base64: true,
       //aspect: [1, 1],
-      quality: .8,
+      quality: .6,
     }
     const result = await ImagePicker.launchImageLibraryAsync(options)
 
@@ -84,7 +84,7 @@ const MyComponent = props => {
       //DIMINUI O TAMANHO DA IMAGEM PARA 50%
       resize = await ImageManipulator.manipulateAsync(
         result.uri,
-        [{ resize: { width: result.width * 0.8 } }],
+        [{ resize: { width: result.width * 0.6 } }],
         {
           compress: .8,
           format: ImageManipulator.SaveFormat.JPEG,

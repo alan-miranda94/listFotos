@@ -36,7 +36,7 @@ const MyComponent = props => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       //aspect: [1, 1],
-      quality: .8,
+      quality: .6,
     }
     const result = await ImagePicker.launchCameraAsync(options)
 

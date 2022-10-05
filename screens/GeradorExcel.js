@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react'
-import { StyleSheet, View, Image, Text, Linking, WebView, Alert,Share } from 'react-native'
+import { StyleSheet, View, Image, Text, Linking, WebView, Alert, Share } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { ListContext } from '../contexts/listContexts'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -358,7 +358,7 @@ export default props => {
           },
           editAs: 'undefined'
         })
-      }else{
+      } else {
         wsFoto.getCell(start).value = ("NA")
         wsFoto.getCell(start).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
       }
@@ -393,7 +393,7 @@ export default props => {
       mergeCells(wsFoto, legLinhas[controle][1] + (number[0] + 14), legLinhas[controle][3] + (number[0] + 14))
       let bpL2 = wsFoto.getCell(legLinhas[controle][1] + (number[0] + 14))
       bpL2.font = { size: 10, }
-      bpL2.value = item.numBPSGP ? item.numBPSGP : 'SEM BP'
+      bpL2.value = item.numBPSGP ? item.numBPSGP : 'NÃO ETIQUETAVEL'
       bpL2.border = {
         right: { style: 'thin', color: { argb: '000000' } }
       }
@@ -513,7 +513,7 @@ export default props => {
       navigation.navigate('Home')
     } catch (e) {
       console.log(e)
-      alert('ERRO AO SALVAR')
+      //alert('ERRO AO SALVAR')
     }
 
   }
@@ -547,7 +547,11 @@ export default props => {
           //converte o pdf
 
           setExcel(fileUri)
-          alert('ARQUIVO GERADO COM SUCESSO')
+          Toast.show({
+            type: 'success',
+            text1: 'ARQUIVO GERADO COM SUCESSO'
+          })
+         // alert('ARQUIVO GERADO COM SUCESSO')
           resolve(true)
         })
       })
@@ -710,7 +714,7 @@ export default props => {
       saveExcel(route.params.title).then((e) => {
         setProgress(false)
       })
-     }, 1 * 1000)
+    }, 1 * 1000)
 
 
 
@@ -718,57 +722,72 @@ export default props => {
 
   const zipFiles = async () => {
     return new Promise(async (resolve, reject) => {
-      const typeDoc = route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'
-      const name = `${typeDoc}_${route.params.equipName}_${route.params.title.toUpperCase()}_(${route.params.type})`
-      let fileUri = FileSystem.cacheDirectory + name + '.zip'
-      const imgs = getAllImage()
-      const nodeBuffer = NodeBuffer.from(b64Excel)
-      const bufferStr = nodeBuffer.toString('base64')
+      try {
+        const typeDoc = route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'
+        const name = `${typeDoc}_${route.params.equipName}_${route.params.title.toUpperCase()}_(${route.params.type})_Rev.0`
+        let fileUri = FileSystem.cacheDirectory + name + '.zip'
+        const imgs = getAllImage()
+        const nodeBuffer = NodeBuffer.from(b64Excel)
+        const bufferStr = nodeBuffer.toString('base64')
 
 
-      //ADICIONA AS FOTOS NO ARQUIVO 
+        //ADICIONA AS FOTOS NO ARQUIVO 
 
+        let fotos = zip.folder("FOTOS")
+        for (const item of imgs) {
 
-
-      let fotos = zip.folder("FOTOS")
-      for (const item of imgs) {
-
-        if (item) {
-          fotos.file(`${item.name}.jpg`, item.img, { base64: true })
+          if (item) {
+            fotos.file(`${item.name}.jpg`, item.img, { base64: true })
+          }
         }
+
+        //ADICIONA O EXCEL NO ARQUIVO ZIP
+        zip.file(name + '.xlsx', bufferStr, { base64: true })
+
+        if (route.params.dePara) {
+          let textDePara = []
+          const text = route.params.dePara.map((item, index) => {
+            return (`${index + 1}. DE ${item.de} <> PARA ${item.para}\n`)
+          })
+          zip.file('DePara.txt', text.toString())
+
+        }
+
+        //CRIA O ARQUIVO ZIP
+        zip.generateAsync({ type: "base64" }).then(function (base64) {
+          //console.log(base64)
+          //saveAs(base64, "hello.zip")
+          FileSystem.writeAsStringAsync(fileUri, base64, {
+            encoding: FileSystem.EncodingType.Base64
+          }).then(async () => {
+            //converte o pdf
+
+            setFileZip(fileUri)
+            resolve(fileUri)
+            setProgress(false)
+            //alert('ARQUIVO GERADO COM SUCESSO')
+
+          })
+
+          // location.href="data:application/zip;base64," + base64;
+        });
+
+        
+
+      } catch (error) {
+        Alert.alert(
+          'ERRO AO ANEXAR ',
+          'ENVIAR O ERRO PARA O ADMINISTRADOR DO APLICATIVO',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'cancel',
+            },
+            { text: 'OK', onPress: () => Share.share({title:'ERRO AO ANEXAR FOTOS',message: error}) },
+          ]
+        )
       }
-
-      //ADICIONA O EXCEL NO ARQUIVO ZIP
-      zip.file(name + '.xlsx', bufferStr, { base64: true })
-
-      if (route.params.dePara) {
-        let textDePara = []
-        const text = route.params.dePara.map((item, index) => {
-          return (`${index + 1}. DE ${item.de} <> PARA ${item.para}\n`)
-        })
-        zip.file('DePara.txt', text.toString())
-
-      }
-
-      //CRIA O ARQUIVO ZIP
-      zip.generateAsync({ type: "base64" }).then(function (base64) {
-        //console.log(base64)
-        //saveAs(base64, "hello.zip")
-        FileSystem.writeAsStringAsync(fileUri, base64, {
-          encoding: FileSystem.EncodingType.Base64
-        }).then(async () => {
-          //converte o pdf
-
-          setFileZip(fileUri)
-          resolve(fileUri)
-          setProgress(false)
-          //alert('ARQUIVO GERADO COM SUCESSO')
-
-        })
-
-        // location.href="data:application/zip;base64," + base64;
-      });
-
     })
 
     //Sharing.shareAsync( promise)
@@ -812,19 +831,19 @@ export default props => {
     });
   }
 
-  
+
   const shareDePara = async () => {
     let msg = ''
-    let dePara = route.params.dePara.forEach(item =>{
-      msg +=  `\nDE: ${item.de} PARA: ${item.para} `
+    let dePara = route.params.dePara.forEach(item => {
+      msg += `\nDE: ${item.de} PARA: ${item.para} `
     })
 
     const options = {
       title: "DE <> PARA",
       message: msg,
-   
+
     }
-    await  Share.share(options)
+    await Share.share(options)
 
   }
 
@@ -954,16 +973,16 @@ export default props => {
       >
         Enviar Excel
       </Button>
-      { route.params.dePara&&
-      <Button
-        disabled={!excel}
-        style={[styles.button]}
-        onPress={shareDePara}
-        mode='contained'
-        color="#2196f3"
-      >
-        Enviar DE PARA
-      </Button>}
+      {route.params.dePara &&
+        <Button
+          disabled={!excel}
+          style={[styles.button]}
+          onPress={shareDePara}
+          mode='contained'
+          color="#2196f3"
+        >
+          Enviar DE PARA
+        </Button>}
       {true &&
         <Button
           style={styles.button}

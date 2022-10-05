@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu'
 import Toast from 'react-native-toast-message'
 import { ROT, SFP } from '../ROT-FPS'
-
+import easyDB from "easy-db-react-native";
 
 export default props => {
   //const { otherParam , title} = props.route.params
@@ -36,21 +36,45 @@ export default props => {
   //const {dispatch} = useContext(ListContext)
   const navigation = useNavigation()
   const route = useRoute()
+  const { insert, select, update, remove } = easyDB()
+  const [loading, setLoading] = useState(false)
+  const [saved, setSaved] = useState(null)
+ 
 
-  //pega permisão do usuario par atirar foto
-  useEffect(() => {
-
-
-
-  }, [])
 
   //MOSTRA A LISTA ATUAL
   useEffect(() => {
-   
     //
     //setDePara(newDePara)
-    //console.log('NL',state[route.params.listName][route.params.listName.length])
+
+    if (route.params.listName === 'galeria') {
+      setLoading(true)
+      setDePara(route.params.dePara)
+      setEquipamento({ MODELO: route.params.equipamento })
+      setSaved(route.params.id)
+     //console.log('VEIO DA GALERIA NL- ',route.params.id)
+
+
+    }
     setLista(state[route.params.listName])
+    setLoading(false)
+  }, [state])
+
+  //MOSTRA A LISTA ATUAL
+  useEffect(() => {
+    //
+    //setDePara(newDePara)
+
+    if (route.params.listName === 'galeria') {
+      setLoading(true)
+      setDePara(route.params.dePara)
+      setEquipamento({ MODELO: route.params.equipamento })
+      setSaved(route.params.id)
+
+
+    }
+    setLista(state[route.params.listName])
+    setLoading(false)
   }, [state])
 
 
@@ -91,7 +115,7 @@ export default props => {
     Toast.show({
       type: 'info',
       text1: 'VERIFIQUE SE SELECIONOU',
-      text2:`- EQUIPAMENTO e o DE<>PARA`
+      text2: `- EQUIPAMENTO e o DE<>PARA`
     })
   }
 
@@ -129,6 +153,45 @@ export default props => {
     }
   }
 
+  const saveEasyDB = async () => {
+    try {
+      const data = {
+        name: route.params.title,
+        list: lista,
+        dePara: dePara,
+        equipamento: equipamento['MODELO'],
+        type: route.params.type
+      }
+
+      //SE JA FOI CRIADO ATUALIZA
+      if (saved) {
+        console.log('JA EXISTE NL - ', saved)
+        await update('sites', saved, { id:saved, ...data })
+        hideMenu()
+        Toast.show({
+          type: 'success',
+          text1: 'Salvo com sucesso'
+        })
+        return true
+      }
+      const idOfRow = await insert('sites', (id) => ({ id, ...data }))
+      setSaved(idOfRow)
+      console.log(idOfRow)
+      Toast.show({
+        type: 'success',
+        text1: 'Salvo com sucesso'
+      })
+
+    } catch (error) {
+      console.log(error)
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao Salvar'
+      })
+    }
+
+    hideMenu()
+  }
   //CHAMA SALVA FOTOS
   const pressSave = async () => {
     // salvar item no assinc storage 
@@ -186,7 +249,7 @@ export default props => {
   }
 
   const handleDeParaAdd = () => {
-    const newDePara = dePara?[...dePara]:[]
+    const newDePara = dePara ? [...dePara] : []
     if (textDe && textPara) {
       newDePara.push(
         {
@@ -196,7 +259,7 @@ export default props => {
       )
       setDePara(newDePara)
       setModalDePara(false)
-    }else{
+    } else {
       Toast.show({
         type: 'info',
         text1: 'PREENCHA TODOS OS CAMPOS'
@@ -205,8 +268,8 @@ export default props => {
 
   }
 
-  const removeDePara = (file)=>{
-    const newDePara = dePara.filter((item)=>item.de !== file.de)
+  const removeDePara = (file) => {
+    const newDePara = dePara.filter((item) => item.de !== file.de)
     setDePara(newDePara)
   }
 
@@ -232,7 +295,7 @@ export default props => {
           >
             {
               //esta dando erro quando tem muitas fotos
-              //<MenuItem onPress={pressSave}><Text>Salvar</Text></MenuItem>
+              <MenuItem onPress={saveEasyDB}><Text>Salvar</Text></MenuItem>
             }
             <MenuItem onPress={pressGerar}>Gerar Excel</MenuItem>
             <MenuItem onPress={pressClear}>Limpar</MenuItem>
@@ -265,7 +328,7 @@ export default props => {
             //ListFooterComponent={() => <Text style={styles.logo}>FROM MSTUDIO</Text>}
             renderItem={({ item }) => (
               <List.Item
-                key = {Math.random()}
+                key={Math.random()}
                 titleStyle={{ fontSize: 11 }}
                 title={`DE: ${item.de} PARA: ${item.para}`}
                 left={props => <IconButton {...props} icon="delete" size={26} onPress={() => removeDePara(item)} />}
@@ -336,7 +399,7 @@ export default props => {
             />
             <Text style={{ fontWeight: 'bold', color: 'white', }}>ADICIONAR DE - PARA</Text>
           </View>
-          <View style={{ height: 300, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center' ,width:"90%",}}>
+          <View style={{ height: 300, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', width: "90%", }}>
 
             <TextInput
               style={{
@@ -422,7 +485,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     //paddingTop: Constants.statusBarHeight,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems:'center'
+    alignItems: 'center'
     //padding: 8,
 
   },
@@ -436,8 +499,8 @@ const styles = StyleSheet.create({
     borderTopStartRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    width:'90%'
-    
+    width: '90%'
+
   }
 });
 

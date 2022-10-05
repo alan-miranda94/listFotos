@@ -15,23 +15,38 @@ const MyComponent = props => {
   const navigation = useNavigation()
   const {dispatch} = useContext(ListContext)
   
-  const openData = async(name)=>{
-    try {
-      const response = await AsyncStorage.getItem(name)
-      const data = response?JSON.parse(response):[]
-      //console.log(data)
-      return data
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
   const pressButton = async ()=>{
-    //console.log(props.site)
-    const site = await openData(props.site)
-    let title= props.site.replace('@','')
-    const isInvetario = title.includes('inventario')
-    console.log(isInvetario)
+   
+    const site =  props.site.list
+    let title = props.site.name //.replace('@','')
+    const isInvetario = props.site.inventario?props.site.inventario.length > 0:false
+   
+   
+    //VAI PARA LISTA DE INVENTARIO
+    if(isInvetario){
+      title = title.replace('inventario:','')
+      
+      dispatch({
+        type: 'galeria',
+        payload: {
+          list:'inventario',
+          site: props.site.inventario
+        }
+      })
+      navigation.navigate(
+        'Inventario',
+        {
+          route:'galeria',
+          listName:'inventario', 
+          title, 
+          equipamento: props.site.equipamento,
+          type:props.site.type,
+          id:props.site['id'],
+        }
+      )
+      return
+    }
 
     dispatch({
       type: 'galeria',
@@ -41,25 +56,32 @@ const MyComponent = props => {
       }
     })
 
-    if(isInvetario){
-      title = title.replace('inventario:','')
-      navigation.navigate('Inventario',{listName:'inventario', title})
-      return
-    }
-    navigation.navigate('NewList',{listName:'galeria', title})
+    //VAI PARA LISTA DE RELATORIOS
+    navigation.navigate(
+      'NewList',
+      {
+        listName:'galeria', 
+        id:props.site['id'],
+        title,
+        dePara:props.site.dePara,
+        equipamento:props.site.equipamento,
+        type:props.site.type
+      }
+    )
     
     
   }
 
+ 
   return (
     <TouchableOpacity style={styles.container} onPress={pressButton}>    
       <View style={{ flex:1}}>
       <Text style={{fontWeight:'bold', fontSize:16, alignSelf:'center'}}>
-        {props.site.replace('@','')}
+        {props.site.name} | {props.site.list&&props.site.list.length >0? props.site.type:'inventario'}
       </Text>
       </View>  
       
-      <TouchableOpacity style={styles.texto} onPress={()=>props.remove(props.site)}>
+      <TouchableOpacity style={styles.texto} onPress={()=>props.remove(props.site['id'])}>
             <Ionicons
               style={{ justifyContent: 'flex-end' }}
               name="trash-outline"
