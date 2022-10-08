@@ -50,7 +50,7 @@ export default props => {
         index: 0, 
         routes: [
           {
-            name:type==='inventario'?'Inventario':'NewList', 
+            name:type==='inventario'?'Inventario':type==='Vistória'?'Vistoria':'NewList', 
             params:{ 
               title: title , 
               listName: listName,
@@ -121,6 +121,14 @@ export default props => {
           color="#2196f3"
         >
           MIGRAÇÃO
+        </Button>
+        <Button
+          style={styles.button}
+          onPress={() => pressButton(title, 'vistoria','Vistória')}
+          mode='contained'
+          color="#2196f3"
+        >
+          VISTÓRIA
         </Button>
         <Button
           style={styles.button}

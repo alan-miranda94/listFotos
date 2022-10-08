@@ -9,7 +9,7 @@ import Galeria from '../screens/Galeria'
 import Inventario from '../screens/Inventario'
 import addItemInventario from '../screens/addItemInventario'
 import AllAdress from '../screens/AllAdress'
-
+import Vistoria from '../screens/Vistoria'
 
 const Stack = createNativeStackNavigator()
 
@@ -26,6 +26,7 @@ export default () => (
       <Stack.Screen name = 'GeradorExcel' component = {GeradorExcel} />
       <Stack.Screen name = 'Galeria'  options ={{headerShown:true}} component = {Galeria} />
       <Stack.Screen name = 'AddItemInventario'  component = {addItemInventario} />
+      <Stack.Screen name = 'Vistoria'  component = {Vistoria} />
       <Stack.Screen name = 'Endereços'  component = {AllAdress} options={{
         headerShown: true
     }}/>

@@ -172,6 +172,175 @@ export const MIGRACAO = [
   }
 ]
 
+export const VISTORIA = [
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 01 - IDENTIFICAÇÃO DO SITE"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 02 - PANORÂMICA EXTERNA DO SITE"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 03 - PANORÂMICA INTERNA DO SITE"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 04 - BAYFACE DO RACK/BASTIDOR ABERTO(INTEIRO)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 05 -BAYFACE DO RACK/BASTIDOR ABERTO(PARTE DE CIMA)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 06 - BAYFACE DO RACK/BASTIDOR ABERTO(PARTE DO MEIO)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 07 -  BAYFACE DO RACK/BASTIDOR ABERTO(PARTE DE BAIXO)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 08 - LOCAL DE RESERVA PARA NOVO EQUIPAMENTO COM ARÉA DEMARCADA"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 09 - EQUIPAMENTO QUE SERÁ SUBSTITUÍDO (SWAP)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 10 -  IDENTIFICAÇÃO(HOSTNAME) DO EQUIPAMENTO QUE SERÁ SUBSTITUÍDO (SWAP)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 11 -  CONEXÕES(ÓPTICA/LAN) DO EQUIPAMENTO QUE SERÁ SUBSTITUÍDO (SWAP)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 12 - QDCC/PDU - RESERVA DISJUNTORES : \"INFORME AQUI AS POSIÇÕES E AMPERAGEM\""
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 13 - CONSUMO  TOTAL FONTE - VISOR CONTROLADORA OU AMPERÍMETRO EM CC."
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 14 - PANORÂMICA FONTE(RETIFICADORES + CONTROLADORA)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 15 - DISTRIBUIDOR INTERNO OPTICO (DIO)"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 16 - ATERRAMENTO"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 17 - BANCO DE BATERIAS"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 18 - ETIQUETA DO FABRICANTE COM DADOS (amperagem e voltagem) da BATERIA"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 19 - VISTA GERAL OUTRA OPÇÃO POSSÍVEL DE INSTALAÇÃO"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 20 - VISTA OUTRA OPÇÃO POSSÍVEL DE INSTALAÇÃO"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 21 - VISTA OUTRA OPÇÃO POSSÍVEL DE INSTALAÇÃO"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 22 - PANORÂMICA BASTIDORES ABERTOS"
+  }
+]
+
+export const OUTDOOR = [
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 01 - MODELO E CAPACIDADE DE CADA RETIFICADORA"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 02 - FABRICANTE DA RETIFICADORA"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 03 - QUANTIDADE DE UNIDADES RETIFICADORAS"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 04 -  CONSUMO ATUAL DA RETIFICADORA EM (A) - DISPLAY DA RETIFICADORA"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 05 - FOTO PANORÂMICA DO BANCO DE BATERIAS"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 06 - ETIQUETA DO FABRICANTE COM DADOS (amperagem e voltagem) da BATERIA"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 07 - CONSUMO ATUAL DA RETIFICADORA EM (A) - ALICATE AMPERÍMETRO"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 08 - CONSUMO ATUAL DO EQUIPAMENTO ANTIGO - ANTES DO SWAP VIA A"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 09 - CONSUMO ATUAL DO EQUIPAMENTO ANTIGO - ANTES DO SWAP VIA B"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 10 - "
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 11 - CONSUMO ATUAL DO EQUIPAMENTO NOVO - DEPOIS DO SWAP OU AMPLIAÇÃO VIA A"
+  },
+  {
+    "id": "Math.random() * 100'",
+    "title": "FOTO 12 - CONSUMO ATUAL DO EQUIPAMENTO NOVO - DEPOIS DO SWAP OU AMPLIAÇÃO VIA B"
+  }
+]
+export const QTM = [
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO  01 - QTM"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 02 - FASE R"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 03 - FASE S"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 04 - FASE T"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": "FOTO 05 - DISPLAY APAGADO"
+  },
+  {
+    "id": Math.random() * 100,
+    "title": " "
+  }
+]
+
+
 export default [
   {
     id: Math.random() * 100,

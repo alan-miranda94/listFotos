@@ -17,8 +17,6 @@ import * as MediaLibrary from 'expo-media-library'
 import Constants from 'expo-constants'
 import Toast from 'react-native-toast-message'
 import JSZip from 'jszip'
-//import { Mailer } from "nodemailer-react";
-import SMTP_CONFIG from "../config/smtp"
 
 
 
@@ -32,6 +30,7 @@ export default props => {
   const [name, setName] = useState(null)
   const [b64Excel, setB64Excel] = useState()
   const [filesZipe, setFileZip] = useState()
+  const [pdf, setPDF] = useState()
   const workbook = new ExcelJS.Workbook()
   const zip = new JSZip()
   const now = new Date()
@@ -107,7 +106,7 @@ export default props => {
   }
 
   //ADD BORDA TOTAL
-  const addBorderInventario = (ws, cell) => {
+  const addBorderFull = (ws, cell) => {
     ws.getCell(cell).border = {
       top: { style: 'thin', color: { argb: '000000' } },
       left: { style: 'thin', color: { argb: '000000' } },
@@ -116,11 +115,11 @@ export default props => {
     }
   }
 
-  //NO MOMENTO SO SALVA DO INVENTARIO
+  
   const saveWorkbook = (wb, name) => {
     return new Promise(async (resolve, reject) => {
       //Relatório_Fotográfico_7705 SAR-X_CEAER13-RMP01_(Ampliação)_Rev.0
-      const fileName = `Planilha Padrão de Inventário_${route.params.equipName}_${name.toUpperCase()}_(${route.params.type})`
+      const fileName = `${ route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'}${route.params.equipName}_${name.toUpperCase()}_(${route.params.type})`
       const fileUri = FileSystem.cacheDirectory + fileName + '_Rev.0.xlsx'
 
       wb.xlsx.writeBuffer().then((buffer) => {
@@ -175,7 +174,7 @@ export default props => {
     ws.getCell('A1').value = 'PLANILHA PADRÃO DE INVENTÁRIO'
     ws.getCell('A1').font = { size: 14, bold: true }
     ws.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-    addBorderInventario(ws, 'A1')
+    addBorderFull(ws, 'A1')
     ws.addImage(claroImg, {
       tl: { col: 0.1, row: 0.1 },
       //br: { col: 1.1, row: 1.0 },
@@ -194,10 +193,10 @@ export default props => {
     ws.getCell('A2').font = { size: 10, bold: true }
     ws.getCell('A2').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
 
-    addBorderInventario(ws, 'A2')
-    addBorderInventario(ws, 'L2')
+    addBorderFull(ws, 'A2')
+    addBorderFull(ws, 'L2')
     mergeCells(ws, 'M2', 'O2')
-    addBorderInventario(ws, 'M2')
+    addBorderFull(ws, 'M2')
 
     ws.getCell('M2').value = 'OPCIONAL'
     ws.getCell('M2').font = { size: 10, bold: true, }
@@ -214,7 +213,7 @@ export default props => {
       cell.value = text3rows[index]
       cell.font = { size: 10, bold: true, color: { argb: 'FFFFFFFF' } }
       cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-      addBorderInventario(ws, i + '3')
+      addBorderFull(ws, i + '3')
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -304,7 +303,7 @@ export default props => {
         gCell.value = dataItens[index]
         gCell.font = { size: 10, }
         gCell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-        addBorderInventario(ws, c + rows)
+        addBorderFull(ws, c + rows)
       })
 
       //ADICIONA ITEM NA SEGUNDA PAGINA --------------------------------
@@ -457,9 +456,9 @@ export default props => {
     const listType = route.params.inventario ? 'imgMain' : 'img'
     let newList = []
     listFotos.forEach((file, index) => {
-
-      if (file[listType]) {
-
+      
+     
+      if (file[listType]) {       
         let b64Img = file[listType].b64.replace('data:image/png;base64', '')
 
         if (file['imgNumSerie'] && file['imgNumBPSGP']) {
@@ -480,9 +479,9 @@ export default props => {
 
   const downloadExcel = useCallback(async (fileUri) => {
     const downloadUri = fileUri
-    const localPath = `${FileSystem.cacheDirectory}spreadsheet.xlsx`
+    const localPath = `${FileSystem.cacheDirectory}_spreadsheet.xlsx`
     try {
-      await FileSystem.downladAsync(downloadUri, localPath)
+      await FileSystem.downloadAsync(downloadUri, localPath)
         .then(async ({ uri }) => {
           const contentURL = await FileSystem.getContentUriAsync(uri)
           await Linking.openURL(contentURL)
@@ -551,7 +550,7 @@ export default props => {
             type: 'success',
             text1: 'ARQUIVO GERADO COM SUCESSO'
           })
-         // alert('ARQUIVO GERADO COM SUCESSO')
+          // alert('ARQUIVO GERADO COM SUCESSO')
           resolve(true)
         })
       })
@@ -627,7 +626,6 @@ export default props => {
       legenda.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
 
 
-
       if (element.img) {
         //ADDICIONANDO FOTOS
 
@@ -672,11 +670,6 @@ export default props => {
           })
         }
 
-        // worksheet.addImage(foto, {
-        //   tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
-        //   ext: { height: 216, width: 233 },
-        //   editAs: 'undefined'
-        // })//(`${linhas[controle][0] + number[0]}:${linhas[controle][1] + number[1]}`))
 
       } else {
         fotoContainer.value = 'N/A'
@@ -706,10 +699,6 @@ export default props => {
     setTimeout(() => {
       creatHeard(route.params.title)
       addFotos(listFotos)
-
-      // worksheet.pageSetup.printArea = 'A1:P72'
-      //worksheet.pageSetup.printArea = 'A1:P72&&A73:P140&&A141:P208&&A209:P276&&A77:P344&&A345:378'
-
       //salva arquivo como excel
       saveExcel(route.params.title).then((e) => {
         setProgress(false)
@@ -721,6 +710,7 @@ export default props => {
   }
 
   const zipFiles = async () => {
+    
     return new Promise(async (resolve, reject) => {
       try {
         const typeDoc = route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'
@@ -737,7 +727,7 @@ export default props => {
         for (const item of imgs) {
 
           if (item) {
-            fotos.file(`${item.name}.jpg`, item.img, { base64: true })
+            fotos.file(`${route.params.inventario?"I_":'R_'}${item.name}.jpg`, item.img, { base64: true })
           }
         }
 
@@ -769,12 +759,12 @@ export default props => {
 
           })
 
-          // location.href="data:application/zip;base64," + base64;
-        });
+        })
 
-        
+
 
       } catch (error) {
+        console.log(error)
         Alert.alert(
           'ERRO AO ANEXAR ',
           'ENVIAR O ERRO PARA O ADMINISTRADOR DO APLICATIVO',
@@ -784,13 +774,13 @@ export default props => {
               onPress: () => console.log('Cancel Pressed'),
               style: 'cancel',
             },
-            { text: 'OK', onPress: () => Share.share({title:'ERRO AO ANEXAR FOTOS',message: error}) },
+            { text: 'OK', onPress: () => Share.share({ title: 'ERRO AO ANEXAR FOTOS', message: error }) },
           ]
         )
       }
     })
 
-    //Sharing.shareAsync( promise)
+
   }
 
   const shareExcel = async () => {
@@ -807,15 +797,7 @@ export default props => {
       }
     }, 1 * 1000)
 
-    // Sharing.shareAsync(excel, {
-    //   mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // Android
-    //   dialogTitle: 'RELATORIO FEITO COMPARTILHAR COM?', // Android and Web
-    //   UTI: 'com.microsoft.excel.xlsx' // iOS
-    // }).catch(error => {
-    //   console.error('Error', error);
-    // }).then(() => {
-    //   console.log('Return from sharing dialog');
-    // });
+
   }
 
   const shareExcelOnly = async () => {
@@ -882,19 +864,329 @@ export default props => {
       ),
     })
 
-    // const mailer = Mailer(mailerConfig,emailsList);
 
-    // mailer.send(
-    //   'ReminderEmail',
-    //   {
-    //     firstName: "Mathieu",
-    //     task: 'Write package documentation!',
-    //   },
-    //   {
-    //     to: "bydavid16@gmail.com",
-    //     //attachments: [{ content: "bar", filename: "foo.txt" }]
-    //   }
-    // );
+
+  }
+
+  const creatHeardVistoria = (wb, ws) => {
+    const nokiaImg = addImageB64(wb, nokiaLogo)
+
+    mergeCells(ws, 'A1', 'H4')
+    addBorderFull(ws, 'A1')
+    ws.addImage(nokiaImg, {
+      tl: { col: 1.5, row: 0.2 },
+      ext: { width: 140, height: 30 },
+      editAs: 'undefined'
+    })
+
+    mergeCells(ws, 'I1', 'W2')
+    addBorderFull(ws, 'I1')
+    ws.getCell('I1').value = '14 - RELATÓRIO FOTOGRÁFICO'
+    ws.getCell('I1').font = { size: 12, bold: true ,name: 'Arial',}
+    ws.getCell('I1').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+
+    mergeCells(ws, 'I3', 'K4')
+    addBorderFull(ws, 'I3')
+    ws.getCell('I3').value = 'SITE:'
+    ws.getCell('I3').font = { size: 12, bold: true, name: 'Arial' }
+    ws.getCell('I3').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+
+    mergeCells(ws, 'L3', 'W4')
+    addBorderFull(ws, 'L3')
+    ws.getCell('L3').value = route.params.title
+    ws.getCell('L3').font = { size: 16, bold: true, name: 'Arial', color: { argb: 'FF0000' } }
+    ws.getCell('L3').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+
+    ws.getCell('A1').width = 10
+
+
+
+
+  }
+
+  const addItemVistoria = (wb, ws) => {
+    let controle = 1
+    let number = [6, 17]
+    const columns = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W']
+    const column = {
+      1: ['B', 'K'],
+      2: ['M', 'V']
+    }
+    let imgCol = 1
+    let imgRow = 5
+
+    let makePage = 1
+
+    state.vistoria.forEach((item) => {
+
+      let start = column[controle][0] + (number[0])
+      let end = column[controle][1] + number[1]
+
+      mergeCells(ws, start, end)     
+      addBorderFull(ws,  column[controle][0] + (number[0]))
+
+      if (item.img) {
+        
+        let img = addImageB64(wb, item.img.b64)
+
+        //TAMANHO DO QUADRADO NA PLANILHA
+        let height = 176
+        let width = 233
+
+        let newHeight = height
+        let newWidth =  width
+
+        //PORCENTAGEM DE REDUÇÃO DA ALTURA E LARGURA 
+        //DO TAMANHO ORIGINAL DA IMAGEM
+        let porcentH = ((height * 100) / item.img.height) / 100
+        let porcentW = ((width * 100) / item.img.width) / 100
+
+        //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
+        let quemEmaior = (item.img.height > item.img.width) ? true : false
+
+        do {
+          if (quemEmaior) {
+            newWidth = item.img.width * porcentH
+  
+          }
+          //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
+          else {       
+            newHeight = item.img.height * porcentW
+          }
+          quemEmaior = (height > width) ? true : false
+        } while (newHeight > height || newWidth> width)
+        //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
+        
+
+        //ADICIONA A FOTO COM AS MEDIDAS CERTAS
+        ws.addImage(img, {
+          tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+          ext: {
+            height: newHeight,
+            width: newWidth
+          },
+          editAs: 'undefined'
+        })
+      } else {
+        ws.getCell(start).value = ("NA")
+        ws.getCell(start).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+      }
+
+      //ADICIONA A LEGENDA
+      mergeCells(ws, (column[controle][0] + (number[0] + 13)),(column[controle][1] + (number[1] + 3)))
+      let legenda = ws.getCell(column[controle][0] + (number[0] + 13))
+      legenda.font = { size: 9, bold: true, name: 'Arial' }
+      legenda.value = item.title
+      legenda.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+      addBorderFull(ws, column[controle][0] + (number[0] + 13))
+
+      //ADICIONNA O MARCADO DE PAGINAS 
+      if(makePage === 8){
+        mergeCells(ws,'A'+(number[0] + 16), 'W'+(number[0] + 16) )
+        addBorderFull(ws, 'A'+(number[0] + 16))
+        let pagText = ws.getCell('A'+(number[0] + 16))
+        pagText.font = { size: 10, bold: true, name: 'Arial' }
+        pagText.value = 'Folha XX de XXXX'
+        pagText.alignment = { vertical: 'bottom', horizontal: 'right' }
+      }
+      
+      if (controle === 2) {
+        imgRow += makePage === 8?18: 16
+        number[0] += makePage === 8?18: 16
+        number[1] += makePage === 8?18: 16       
+      }
+      
+      controle === 2 ? controle = 1 : controle += 1
+      imgCol === 12 ? imgCol = 1 : imgCol += 11
+      makePage === 8 ? makePage = 1 : makePage += 1
+
+      
+    })
+    
+    ws.getCell('X1').value = ' '
+    for(let i = 5; i<=185; i++){
+      if(i != 70 && i != 136 ){
+        ws.getCell('W'+ i).border = {       
+          right: { style: 'thin', color: { argb: '000000' } }
+        }
+      }
+    }
+    columns.forEach(letter =>{
+      if(letter === 'W'){
+        ws.getCell('W' + 186).border = {    
+          bottom: { style: 'thin', color: { argb: '000000' } },   
+          right: { style: 'thin', color: { argb: '000000' } }
+        }
+      }else{
+        ws.getCell(letter + 186).border = {       
+          bottom: { style: 'thin', color: { argb: '000000' } },
+        }
+      }
+     
+    })
+    ws.pageSetup.printArea = 'A1:X187'
+  }
+
+  const createHeardDefault = (wb, ws) =>{
+      //CARREGANDO IMAGENS DA LOGO  E ADICIONANDO NA PLANILHA
+      const claroImg = addImageB64(wb, claroLogo)
+      const nokiaImg = addImageB64(wb, nokiaLogo)
+     
+      ws.addImage(claroImg, 'P1:P3')     
+      ws.addImage(nokiaImg, 'A2:C3')
+  
+      //ADICIONA A ESAÇÃO  
+      ws.getCell('M4').value = 'Estação'
+      ws.getCell('N4').value = route.params.title
+      ws.getCell('N4').font = { color: { argb: "FF0000" } }
+  
+  }
+
+  const addItemDefault = async (wb, ws, list) => {
+    let controle = 1
+    let column = {
+      1: ['B', 'E'],
+      2: ['G', 'J'],
+      3: ['L', 'O']
+    }
+    let number = [6, 17]
+    let imgCol = 1
+    let imgRow = 5
+
+    createHeardDefault(wb,ws)
+
+    state[list].forEach((item)=>{
+      let start = column[controle][0] + (number[0])
+      let end = column[controle][1] + number[1]
+
+      mergeCells(ws, start, end)
+      addBorderFull(ws,  column[controle][0] + (number[0]))
+      
+      if (item.img) {
+        
+        let img = addImageB64(wb, item.img.b64)
+
+        //TAMANHO DO QUADRADO NA PLANILHA
+        let height = 216
+        let width = 233
+
+        let newHeight = height
+        let newWidth =  width
+
+        //PORCENTAGEM DE REDUÇÃO DA ALTURA E LARGURA 
+        //DO TAMANHO ORIGINAL DA IMAGEM
+        let porcentH = ((height * 100) / item.img.height) / 100
+        let porcentW = ((width * 100) / item.img.width) / 100
+
+        //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
+        let quemEmaior = (item.img.height > item.img.width) ? true : false
+
+        do {
+          if (quemEmaior) {
+            newWidth = item.img.width * porcentH
+  
+          }
+          //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
+          else {       
+            newHeight = item.img.height * porcentW
+          }
+          quemEmaior = (height > width) ? true : false
+        } while (newHeight > height || newWidth> width)
+        //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
+        
+
+        //ADICIONA A FOTO COM AS MEDIDAS CERTAS
+        ws.addImage(img, {
+          tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+          ext: {
+            height: newHeight,
+            width: newWidth
+          },
+          editAs: 'undefined'
+        })
+      } else {
+        ws.getCell(start).value = ("NA")
+        ws.getCell(start).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+      }
+      //ADICIONA A LEGENDA
+      mergeCells(ws, (column[controle][0] + (number[0] + 13)),(column[controle][1] + (number[1] + 4)))
+      addBorderFull(ws, column[controle][0] + (number[0] + 13))
+      
+      let legenda = ws.getCell(column[controle][0] + (number[0] + 13))
+      legenda.font = { size: 9, bold: true, name: 'Arial' }
+      legenda.value = item.title
+      legenda.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+      
+      if (controle === 3) {
+        imgRow += 17
+        number[0] += 17
+        number[1] += 17
+      }
+
+      controle === 3 ? controle = 1 : controle += 1
+      imgCol === 11 ? imgCol = 1 : imgCol += 5
+    
+    })
+
+  } 
+
+  const gerarVistoria = async () => {
+
+    setProgress(true)
+    setTimeout(() => {
+      const wb = creatWorkbook()
+      const now = new Date()
+      wb.creator = 'APP RELATORIO'
+      wb.created = now
+      const wsVistoria = creatWorksheet(wb, 'VISTORIA', 'landscape')
+      const wsOutdoor = creatWorksheet(wb, 'OUTDOOR', 'landscape')
+      const wsQTM = creatWorksheet(wb, 'QTM', 'landscape')
+
+      wsVistoria.properties.defaultColWidth = 4
+      wsVistoria.properties.defaultRowHeight = 13
+      creatHeardVistoria(wb, wsVistoria)
+      addItemVistoria(wb, wsVistoria)
+
+      addItemDefault(wb, wsOutdoor, 'outdoor')
+      addItemDefault(wb,wsQTM, 'qtm')
+
+      let allFotos = []
+      allFotos = state['vistoria'].concat(state['outdoor'],state['qtm'])
+
+      setListFotos(allFotos)
+      saveWorkbook(wb, route.params.title).then(() => setProgress(false))
+    }, 1 * 1000)
+  }
+
+
+  const downloadFile = async () => {
+    const uri = await FileSystem.getContentUriAsync(excel)
+    // Do this to use base64 encoding
+    const nodeBuffer = NodeBuffer.from(b64Excel)
+    console.log(uri)
+    console.log(excel)
+    const bufferStr = nodeBuffer.toString('base64')
+    const downloadUri = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${bufferStr}`
+    await Linking.openURL(uri)
+
+
+  }
+
+
+  const handleGeraRelatorio = () => {
+    //route.params.inventario ? gerarInventario : generateExcel
+
+    if (route.params.inventario) {
+      gerarInventario()
+      return
+    }
+    if (route.params.type === "Vistória") {
+      gerarVistoria()
+      return
+    }
+
+    generateExcel()
+
 
   }
 
@@ -927,33 +1219,16 @@ export default props => {
           </View>
         </MaterialCommunityIcons>
       }
-      {false &&
-        <MyTextInput
-          title={'NOME DO SITE'}
-          value={name}
-          placeholder='EX:NOME-DO-SITE'
-          onChangeText={(t) => setName(t)}
-        />
-      }
+
       <Button
         style={styles.button}
-        onPress={route.params.inventario ? gerarInventario : generateExcel}
+        onPress={handleGeraRelatorio}
         mode='contained'
         color="#2196f3"
       >
         Gerar Relatorio
       </Button>
-      {false &&
-        <Button
-          disabled={!excel}
-          style={[styles.button]}
-          onPress={shareExcel}
-          mode='contained'
-          color="#2196f3"
-        >
-          Baixar
-        </Button>
-      }
+     
       <Button
         disabled={!excel}
         style={[styles.button]}
@@ -973,6 +1248,7 @@ export default props => {
       >
         Enviar Excel
       </Button>
+      
       {route.params.dePara &&
         <Button
           disabled={!excel}
@@ -983,7 +1259,7 @@ export default props => {
         >
           Enviar DE PARA
         </Button>}
-      {true &&
+      
         <Button
           style={styles.button}
           onPress={finalize}
@@ -992,7 +1268,7 @@ export default props => {
         >
           FINALIZAR
         </Button>
-      }
+      
     </View>
   )
 

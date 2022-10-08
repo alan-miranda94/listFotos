@@ -1,11 +1,14 @@
 import js from '../lista2.json'
 import { rackNovo, existente, ampliacao } from '../listData'
-import modelo, { AMPLIACAO, MIGRACAO } from '../modeloList'
+import modelo, { AMPLIACAO, MIGRACAO, VISTORIA, OUTDOOR, QTM } from '../modeloList'
 
 export const initialState = {
   ampliacao: AMPLIACAO,
   migracao: MIGRACAO,
   atualLista: [],
+  vistoria:VISTORIA,
+  outdoor:OUTDOOR,
+  qtm:QTM,
   modelo: modelo,
   galeria: [],
   title: 'FOTOS',
