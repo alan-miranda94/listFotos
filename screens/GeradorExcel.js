@@ -115,11 +115,11 @@ export default props => {
     }
   }
 
-  
+
   const saveWorkbook = (wb, name) => {
     return new Promise(async (resolve, reject) => {
       //Relatório_Fotográfico_7705 SAR-X_CEAER13-RMP01_(Ampliação)_Rev.0
-      const fileName = `${ route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'}${route.params.equipName}_${name.toUpperCase()}_(${route.params.type})`
+      const fileName = `${route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'}${route.params.equipName}_${name.toUpperCase()}_(${route.params.type})`
       const fileUri = FileSystem.cacheDirectory + fileName + '_Rev.0.xlsx'
 
       wb.xlsx.writeBuffer().then((buffer) => {
@@ -456,9 +456,9 @@ export default props => {
     const listType = route.params.inventario ? 'imgMain' : 'img'
     let newList = []
     listFotos.forEach((file, index) => {
-      
-     
-      if (file[listType]) {       
+
+
+      if (file[listType]) {
         let b64Img = file[listType].b64.replace('data:image/png;base64', '')
 
         if (file['imgNumSerie'] && file['imgNumBPSGP']) {
@@ -612,7 +612,6 @@ export default props => {
       }
 
 
-
       //ADICIONAR LEGENDA  e COLOCANDO BORDAS DA LEGENDA      
       let legenda = worksheet.getCell(linhas[controle][0] + (number[0] + 13))
       legenda.border = {
@@ -710,7 +709,7 @@ export default props => {
   }
 
   const zipFiles = async () => {
-    
+
     return new Promise(async (resolve, reject) => {
       try {
         const typeDoc = route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'
@@ -727,7 +726,7 @@ export default props => {
         for (const item of imgs) {
 
           if (item) {
-            fotos.file(`${route.params.inventario?"I_":'R_'}${item.name}.jpg`, item.img, { base64: true })
+            fotos.file(`${route.params.inventario ? "I_" : 'R_'}${item.name}.jpg`, item.img, { base64: true })
           }
         }
 
@@ -764,6 +763,7 @@ export default props => {
 
 
       } catch (error) {
+        setProgress(false)
         console.log(error)
         Alert.alert(
           'ERRO AO ANEXAR ',
@@ -786,6 +786,10 @@ export default props => {
   const shareExcel = async () => {
     //const shareableExcelUri = await generateExcel();
     setProgress(true)
+    let allFotos = []
+    allFotos = state['vistoria'].concat(state['outdoor'], state['qtm'])
+    setListFotos(allFotos)
+
     setTimeout(async () => {
       const file = await zipFiles()
       if (file) {
@@ -882,7 +886,7 @@ export default props => {
     mergeCells(ws, 'I1', 'W2')
     addBorderFull(ws, 'I1')
     ws.getCell('I1').value = '14 - RELATÓRIO FOTOGRÁFICO'
-    ws.getCell('I1').font = { size: 12, bold: true ,name: 'Arial',}
+    ws.getCell('I1').font = { size: 12, bold: true, name: 'Arial', }
     ws.getCell('I1').alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
 
     mergeCells(ws, 'I3', 'K4')
@@ -907,7 +911,8 @@ export default props => {
   const addItemVistoria = (wb, ws) => {
     let controle = 1
     let number = [6, 17]
-    const columns = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W']
+    let infinit = 0
+    const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W']
     const column = {
       1: ['B', 'K'],
       2: ['M', 'V']
@@ -922,213 +927,228 @@ export default props => {
       let start = column[controle][0] + (number[0])
       let end = column[controle][1] + number[1]
 
-      mergeCells(ws, start, end)     
-      addBorderFull(ws,  column[controle][0] + (number[0]))
+      mergeCells(ws, start, end)
+      addBorderFull(ws, column[controle][0] + (number[0]))
 
       if (item.img) {
-        
-        let img = addImageB64(wb, item.img.b64)
+        try {
+          let img = addImageB64(wb, item.img.b64)
 
-        //TAMANHO DO QUADRADO NA PLANILHA
-        let height = 176
-        let width = 233
+          //TAMANHO DO QUADRADO NA PLANILHA
+          let height = 176
+          let width = 233
 
-        let newHeight = height
-        let newWidth =  width
+          let newHeight = height
+          let newWidth = width
 
-        //PORCENTAGEM DE REDUÇÃO DA ALTURA E LARGURA 
-        //DO TAMANHO ORIGINAL DA IMAGEM
-        let porcentH = ((height * 100) / item.img.height) / 100
-        let porcentW = ((width * 100) / item.img.width) / 100
+          //PORCENTAGEM DE REDUÇÃO DA ALTURA E LARGURA 
+          //DO TAMANHO ORIGINAL DA IMAGEM
+          let porcentH = ((height * 100) / item.img.height) / 100
+          let porcentW = ((width * 100) / item.img.width) / 100
 
-        //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
-        let quemEmaior = (item.img.height > item.img.width) ? true : false
+          //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
+          let quemEmaior = (item.img.height > item.img.width) ? true : false
 
-        do {
-          if (quemEmaior) {
-            newWidth = item.img.width * porcentH
-  
-          }
-          //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
-          else {       
-            newHeight = item.img.height * porcentW
-          }
-          quemEmaior = (height > width) ? true : false
-        } while (newHeight > height || newWidth> width)
-        //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
-        
+          do {
+            if (infinit === 100) return alert('LOOP INFINITO')
+            if (quemEmaior) {
+              newWidth = item.img.width * porcentH
 
-        //ADICIONA A FOTO COM AS MEDIDAS CERTAS
-        ws.addImage(img, {
-          tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
-          ext: {
-            height: newHeight,
-            width: newWidth
-          },
-          editAs: 'undefined'
-        })
+            }
+            //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
+            else {
+              newHeight = item.img.height * porcentW
+            }
+            quemEmaior = (height > width) ? true : false
+          } while (newHeight > height || newWidth > width)
+          //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
+
+
+          //ADICIONA A FOTO COM AS MEDIDAS CERTAS
+          ws.addImage(img, {
+            tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+            ext: {
+              height: newHeight,
+              width: newWidth
+            },
+            editAs: 'undefined'
+          })
+        } catch (error) {
+          alert("Erro ao redimencionar fotos - ", error)
+        }
       } else {
         ws.getCell(start).value = ("NA")
         ws.getCell(start).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
       }
 
-      //ADICIONA A LEGENDA
-      mergeCells(ws, (column[controle][0] + (number[0] + 13)),(column[controle][1] + (number[1] + 3)))
-      let legenda = ws.getCell(column[controle][0] + (number[0] + 13))
-      legenda.font = { size: 9, bold: true, name: 'Arial' }
-      legenda.value = item.title
-      legenda.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-      addBorderFull(ws, column[controle][0] + (number[0] + 13))
+      try {
+        //ADICIONA A LEGENDA
+        mergeCells(ws, (column[controle][0] + (number[0] + 13)), (column[controle][1] + (number[1] + 3)))
+        let legenda = ws.getCell(column[controle][0] + (number[0] + 13))
+        legenda.font = { size: 9, bold: true, name: 'Arial' }
+        legenda.value = item.title
+        legenda.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+        addBorderFull(ws, column[controle][0] + (number[0] + 13))
 
-      //ADICIONNA O MARCADO DE PAGINAS 
-      if(makePage === 8){
-        mergeCells(ws,'A'+(number[0] + 16), 'W'+(number[0] + 16) )
-        addBorderFull(ws, 'A'+(number[0] + 16))
-        let pagText = ws.getCell('A'+(number[0] + 16))
-        pagText.font = { size: 10, bold: true, name: 'Arial' }
-        pagText.value = 'Folha XX de XXXX'
-        pagText.alignment = { vertical: 'bottom', horizontal: 'right' }
+        //ADICIONNA O MARCADO DE PAGINAS 
+        if (makePage === 8) {
+          mergeCells(ws, 'A' + (number[0] + 16), 'W' + (number[0] + 16))
+          addBorderFull(ws, 'A' + (number[0] + 16))
+          let pagText = ws.getCell('A' + (number[0] + 16))
+          pagText.font = { size: 10, bold: true, name: 'Arial' }
+          pagText.value = 'Folha XX de XXXX'
+          pagText.alignment = { vertical: 'bottom', horizontal: 'right' }
+        }
+
+      } catch (error) {
+        alert('Erro em adicionar legenda - ', error)
       }
-      
+
       if (controle === 2) {
-        imgRow += makePage === 8?18: 16
-        number[0] += makePage === 8?18: 16
-        number[1] += makePage === 8?18: 16       
+        imgRow += makePage === 8 ? 18 : 16
+        number[0] += makePage === 8 ? 18 : 16
+        number[1] += makePage === 8 ? 18 : 16
       }
-      
+
       controle === 2 ? controle = 1 : controle += 1
       imgCol === 12 ? imgCol = 1 : imgCol += 11
       makePage === 8 ? makePage = 1 : makePage += 1
 
-      
+
     })
-    
+
     ws.getCell('X1').value = ' '
-    for(let i = 5; i<=185; i++){
-      if(i != 70 && i != 136 ){
-        ws.getCell('W'+ i).border = {       
+    for (let i = 5; i <= 185; i++) {
+      if (i != 70 && i != 136) {
+        ws.getCell('W' + i).border = {
           right: { style: 'thin', color: { argb: '000000' } }
         }
       }
     }
-    columns.forEach(letter =>{
-      if(letter === 'W'){
-        ws.getCell('W' + 186).border = {    
-          bottom: { style: 'thin', color: { argb: '000000' } },   
+    columns.forEach(letter => {
+      if (letter === 'W') {
+        ws.getCell('W' + 186).border = {
+          bottom: { style: 'thin', color: { argb: '000000' } },
           right: { style: 'thin', color: { argb: '000000' } }
         }
-      }else{
-        ws.getCell(letter + 186).border = {       
+      } else {
+        ws.getCell(letter + 186).border = {
           bottom: { style: 'thin', color: { argb: '000000' } },
         }
       }
-     
+
     })
     ws.pageSetup.printArea = 'A1:X187'
   }
 
-  const createHeardDefault = (wb, ws) =>{
-      //CARREGANDO IMAGENS DA LOGO  E ADICIONANDO NA PLANILHA
-      const claroImg = addImageB64(wb, claroLogo)
-      const nokiaImg = addImageB64(wb, nokiaLogo)
-     
-      ws.addImage(claroImg, 'P1:P3')     
-      ws.addImage(nokiaImg, 'A2:C3')
-  
-      //ADICIONA A ESAÇÃO  
-      ws.getCell('M4').value = 'Estação'
-      ws.getCell('N4').value = route.params.title
-      ws.getCell('N4').font = { color: { argb: "FF0000" } }
-  
+  const createHeardDefault = (wb, ws) => {
+    //CARREGANDO IMAGENS DA LOGO  E ADICIONANDO NA PLANILHA
+    const claroImg = addImageB64(wb, claroLogo)
+    const nokiaImg = addImageB64(wb, nokiaLogo)
+
+    ws.addImage(claroImg, 'P1:P3')
+    ws.addImage(nokiaImg, 'A2:C3')
+
+    //ADICIONA A ESAÇÃO  
+    ws.getCell('M4').value = 'Estação'
+    ws.getCell('N4').value = route.params.title
+    ws.getCell('N4').font = { color: { argb: "FF0000" } }
+
   }
 
   const addItemDefault = async (wb, ws, list) => {
-    let controle = 1
-    let column = {
-      1: ['B', 'E'],
-      2: ['G', 'J'],
-      3: ['L', 'O']
+    try {
+
+
+      let controle = 1
+      let column = {
+        1: ['B', 'E'],
+        2: ['G', 'J'],
+        3: ['L', 'O']
+      }
+      let number = [6, 17]
+      let imgCol = 1
+      let imgRow = 5
+
+      createHeardDefault(wb, ws)
+
+      state[list].forEach((item) => {
+        let start = column[controle][0] + (number[0])
+        let end = column[controle][1] + number[1]
+
+        mergeCells(ws, start, end)
+        addBorderFull(ws, column[controle][0] + (number[0]))
+
+        if (item.img) {
+
+          let img = addImageB64(wb, item.img.b64)
+
+          //TAMANHO DO QUADRADO NA PLANILHA
+          let height = 216
+          let width = 233
+
+          let newHeight = height
+          let newWidth = width
+
+          //PORCENTAGEM DE REDUÇÃO DA ALTURA E LARGURA 
+          //DO TAMANHO ORIGINAL DA IMAGEM
+          let porcentH = ((height * 100) / item.img.height) / 100
+          let porcentW = ((width * 100) / item.img.width) / 100
+
+          //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
+          let quemEmaior = (item.img.height > item.img.width) ? true : false
+
+          do {
+            if (quemEmaior) {
+              newWidth = item.img.width * porcentH
+
+            }
+            //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
+            else {
+              newHeight = item.img.height * porcentW
+            }
+            quemEmaior = (height > width) ? true : false
+          } while (newHeight > height || newWidth > width)
+          //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
+
+
+          //ADICIONA A FOTO COM AS MEDIDAS CERTAS
+          ws.addImage(img, {
+            tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
+            ext: {
+              height: newHeight,
+              width: newWidth
+            },
+            editAs: 'undefined'
+          })
+        } else {
+          ws.getCell(start).value = ("NA")
+          ws.getCell(start).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+        }
+        //ADICIONA A LEGENDA
+        mergeCells(ws, (column[controle][0] + (number[0] + 13)), (column[controle][1] + (number[1] + 4)))
+        addBorderFull(ws, column[controle][0] + (number[0] + 13))
+
+        let legenda = ws.getCell(column[controle][0] + (number[0] + 13))
+        legenda.font = { size: 9, bold: true, name: 'Arial' }
+        legenda.value = item.title
+        legenda.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+
+        if (controle === 3) {
+          imgRow += 17
+          number[0] += 17
+          number[1] += 17
+        }
+
+        controle === 3 ? controle = 1 : controle += 1
+        imgCol === 11 ? imgCol = 1 : imgCol += 5
+
+      })
+    } catch (error) {
+      console.log('ERRO EM DEFAULT', error)
     }
-    let number = [6, 17]
-    let imgCol = 1
-    let imgRow = 5
 
-    createHeardDefault(wb,ws)
-
-    state[list].forEach((item)=>{
-      let start = column[controle][0] + (number[0])
-      let end = column[controle][1] + number[1]
-
-      mergeCells(ws, start, end)
-      addBorderFull(ws,  column[controle][0] + (number[0]))
-      
-      if (item.img) {
-        
-        let img = addImageB64(wb, item.img.b64)
-
-        //TAMANHO DO QUADRADO NA PLANILHA
-        let height = 216
-        let width = 233
-
-        let newHeight = height
-        let newWidth =  width
-
-        //PORCENTAGEM DE REDUÇÃO DA ALTURA E LARGURA 
-        //DO TAMANHO ORIGINAL DA IMAGEM
-        let porcentH = ((height * 100) / item.img.height) / 100
-        let porcentW = ((width * 100) / item.img.width) / 100
-
-        //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
-        let quemEmaior = (item.img.height > item.img.width) ? true : false
-
-        do {
-          if (quemEmaior) {
-            newWidth = item.img.width * porcentH
-  
-          }
-          //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
-          else {       
-            newHeight = item.img.height * porcentW
-          }
-          quemEmaior = (height > width) ? true : false
-        } while (newHeight > height || newWidth> width)
-        //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
-        
-
-        //ADICIONA A FOTO COM AS MEDIDAS CERTAS
-        ws.addImage(img, {
-          tl: { col: imgCol + 0.05, row: imgRow + 0.5 },
-          ext: {
-            height: newHeight,
-            width: newWidth
-          },
-          editAs: 'undefined'
-        })
-      } else {
-        ws.getCell(start).value = ("NA")
-        ws.getCell(start).alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-      }
-      //ADICIONA A LEGENDA
-      mergeCells(ws, (column[controle][0] + (number[0] + 13)),(column[controle][1] + (number[1] + 4)))
-      addBorderFull(ws, column[controle][0] + (number[0] + 13))
-      
-      let legenda = ws.getCell(column[controle][0] + (number[0] + 13))
-      legenda.font = { size: 9, bold: true, name: 'Arial' }
-      legenda.value = item.title
-      legenda.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
-      
-      if (controle === 3) {
-        imgRow += 17
-        number[0] += 17
-        number[1] += 17
-      }
-
-      controle === 3 ? controle = 1 : controle += 1
-      imgCol === 11 ? imgCol = 1 : imgCol += 5
-    
-    })
-
-  } 
+  }
 
   const gerarVistoria = async () => {
 
@@ -1148,12 +1168,8 @@ export default props => {
       addItemVistoria(wb, wsVistoria)
 
       addItemDefault(wb, wsOutdoor, 'outdoor')
-      addItemDefault(wb,wsQTM, 'qtm')
+      addItemDefault(wb, wsQTM, 'qtm')
 
-      let allFotos = []
-      allFotos = state['vistoria'].concat(state['outdoor'],state['qtm'])
-
-      setListFotos(allFotos)
       saveWorkbook(wb, route.params.title).then(() => setProgress(false))
     }, 1 * 1000)
   }
@@ -1228,7 +1244,7 @@ export default props => {
       >
         Gerar Relatorio
       </Button>
-     
+
       <Button
         disabled={!excel}
         style={[styles.button]}
@@ -1248,7 +1264,16 @@ export default props => {
       >
         Enviar Excel
       </Button>
-      
+      {/* <Button
+        disabled={!excel}
+        style={[styles.button]}
+        onPress={shareExcelOnly}
+        mode='contained'
+        color="#2196f3"
+      >
+        Fotos
+      </Button> */}
+
       {route.params.dePara &&
         <Button
           disabled={!excel}
@@ -1259,16 +1284,16 @@ export default props => {
         >
           Enviar DE PARA
         </Button>}
-      
-        <Button
-          style={styles.button}
-          onPress={finalize}
-          mode='contained'
-          color="#2196f3"
-        >
-          FINALIZAR
-        </Button>
-      
+
+      <Button
+        style={styles.button}
+        onPress={finalize}
+        mode='contained'
+        color="#2196f3"
+      >
+        FINALIZAR
+      </Button>
+
     </View>
   )
 
