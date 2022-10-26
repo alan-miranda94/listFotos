@@ -34,23 +34,24 @@ export default props => {
 
   const onCapture = useCallback(async () => coverRef.current.capture())
 
-  const pressButton = async (title, listName,type ) => {
+  const pressButton = async (title, listName, type ) => {
     if (!title) {
       alert('DIGITE O NOME DO SITE')
       return
     }
     //CRIAR UMA FOTO PADRÃO COM O NOME DO SITE 
-    const name = title + '-inventario' 
+    const name = title +' - '+ type==='inventario'?'Inventario':type==='Vistória'?'Vistoria':'NewList' 
     const coverUri = await onCapture()
     //CRIAR PASTA NA GALERIA COM NOME DA ESTAÇÃO
     const  asset = await MediaLibrary.createAssetAsync(coverUri)
     await MediaLibrary.createAlbumAsync(name, asset, false)
+    const rote = type==='inventario'?'Inventario':type==='Vistória'?'Vistoria':type==='Blank'?'Blank':'NewList'
     navigation.reset(
       { 
         index: 0, 
         routes: [
           {
-            name:type==='inventario'?'Inventario':type==='Vistória'?'Vistoria':'NewList', 
+            name:rote,
             params:{ 
               title: title , 
               listName: listName,
@@ -98,6 +99,23 @@ export default props => {
           </ViewShot>
           </View>
         }
+         <Button
+          style={styles.button}
+          onPress={() => pressButton(title, 'vistoria','Vistória')}
+          mode='contained'
+          color="#2196f3"
+        >
+          VISTÓRIA
+        </Button>
+        <Button
+          style={styles.button}
+          onPress={() =>  pressButton(title, 'inventario','inventario')}
+          mode='contained'
+          color="#2196f3"
+          disabled={false}
+        >
+          INVENTÁRIO
+        </Button>
         <Button
           style={styles.button}
           onPress={() => pressButton(title, 'modelo','Instalação')}
@@ -124,21 +142,13 @@ export default props => {
         </Button>
         <Button
           style={styles.button}
-          onPress={() => pressButton(title, 'vistoria','Vistória')}
+          onPress={() => pressButton(title, 'blank','Blank')}
           mode='contained'
           color="#2196f3"
         >
-          VISTÓRIA
+          EM BRANCO
         </Button>
-        <Button
-          style={styles.button}
-          onPress={() =>  pressButton(title, 'inventario','inventario')}
-          mode='contained'
-          color="#2196f3"
-          disabled={false}
-        >
-          INVENTÁRIO
-        </Button>
+       
       </View>
     </View >
 

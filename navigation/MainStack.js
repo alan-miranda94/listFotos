@@ -10,7 +10,8 @@ import Inventario from '../screens/Inventario'
 import addItemInventario from '../screens/addItemInventario'
 import AllAdress from '../screens/AllAdress'
 import Vistoria from '../screens/Vistoria'
-
+import Blank from '../screens/Blank'
+import Croqui from '../screens/Croqui'
 const Stack = createNativeStackNavigator()
 
 export default () => (
@@ -27,6 +28,9 @@ export default () => (
       <Stack.Screen name = 'Galeria'  options ={{headerShown:true}} component = {Galeria} />
       <Stack.Screen name = 'AddItemInventario'  component = {addItemInventario} />
       <Stack.Screen name = 'Vistoria'  component = {Vistoria} />
+      <Stack.Screen name = 'Blank'  component = {Blank} />
+      <Stack.Screen name = 'Croqui'  component = {Croqui} />
+
       <Stack.Screen name = 'Endereços'  component = {AllAdress} options={{
         headerShown: true
     }}/>

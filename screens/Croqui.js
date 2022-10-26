@@ -5,6 +5,8 @@ import Constants from 'expo-constants'
 import { Button, Checkbox } from 'react-native-paper'
 import { ListContext } from '../contexts/listContexts'
 import Logo from '../assets/icon.png'
+import { DragResize } from '../components/DragResize';
+import { Draggable } from '../components/Draggable';
 const App = props => {
   const navigation = useNavigation()
   const { state, dispatch } = useContext(ListContext)
@@ -33,53 +35,13 @@ const App = props => {
   }
   return (
     <View style={styles.container}>
-      <View style={styles.logo}>
-        <Image
-          style={styles.phrase}
-          source={Logo}
-          resizeMode="center"
-        />
-      </View>
-      <Button
-        style={{ width: '100%', heigth: '10%', marginBottom: 10 }}
-        contentStyle={{ margin: 10 , fontSize:25}}
-        onPress={() => navigation.navigate('NewSite')}// pressButton('MODELO', 'modelo')}
-        icon='folder-plus'
-        mode='contained'
-        color='#ffea00'
-
-      >
-        NOVO SITE
-      </Button>
-      
-      <Button
-        style={{ width: '100%', heigth: '10%', marginBottom: 10 }}
-        contentStyle={{ margin: 10 }}
-        onPress={() =>navigation.navigate('Galeria')}
-        mode='contained'
-        color='#ffea00'
-        icon='folder-multiple-image'
-        disabled={false}
-
-      >
-        GALERIA
-      </Button>
-      <Button
-        style={{ width: '100%', heigth: '10%', marginBottom: 10 }}
-        contentStyle={{ margin: 10 }}
-        onPress={() =>navigation.navigate('Endereços')}
-        mode='contained'
-        color='#ffea00'
-        icon='google-maps'
-        disabled={false}
-
-      >
-        ENDEREÇOS
-      </Button>
-
+      <Draggable>
       <Text style={{color:'white', alignItems:"center", justifyContent:"center"}}>
-        V.3.0.1
+        V.3.0.0
       </Text>
+      </Draggable>
+
+     
     </View>
   );
 }

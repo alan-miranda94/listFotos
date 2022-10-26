@@ -8,7 +8,9 @@ import Constants from 'expo-constants'
 import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu'
 import Toast from 'react-native-toast-message'
 import { ROT, SFP } from '../ROT-FPS'
-
+import ViewShot, { captureRef } from "react-native-view-shot"
+import { Draggable } from '../components/Draggable'
+import { DragResize } from '../components/DragResize'
 
 export default props => {
 
@@ -20,6 +22,7 @@ export default props => {
     const [listType, setListType] = React.useState("vistoria")
     //pega a lista pelo reducer 
     const { state, dispatch } = useContext(ListContext)
+    const coverRef = useRef()
 
 
     const navigation = useNavigation()
@@ -28,7 +31,7 @@ export default props => {
 
 
     useEffect(() => {
-       
+
 
 
     }, [state])
@@ -46,7 +49,7 @@ export default props => {
                         title: route.params.title,
                         type: route.params.type,
                         equipName: equipamento['MODELO'],
-                    
+
 
 
                     })
@@ -103,11 +106,11 @@ export default props => {
         handlePress()
     }
 
-    const handleListTypePress = (type)=>{
+    const handleListTypePress = (type) => {
         setListType(type)
     }
 
-  
+
 
     return (
         <View style={styles.container}>
@@ -129,12 +132,12 @@ export default props => {
 
             </View>
 
-            {listType === 'qtm'&&
-                <View style = {{marginVertical:8,backgroundColor:'white', elevation: 2, padding:8}}>
-                <Text style={{color:"red", textAlign:'justify'}}>
-                ATENÇÃO SÓ USAR ESSA ABA quando o display da retificadora estiver apagado e quando não houver a opção de tirar o consumo com alicate amperímetro nos cabos das retificadoras, medir as fases R, S, T no QTM com alicate amperímetro (tirar foto do display apagado também)
-                </Text>
-            </View>
+            {listType === 'qtm' &&
+                <View style={{ marginVertical: 8, backgroundColor: 'white', elevation: 2, padding: 8 }}>
+                    <Text style={{ color: "red", textAlign: 'justify' }}>
+                        ATENÇÃO SÓ USAR ESSA ABA quando o display da retificadora estiver apagado e quando não houver a opção de tirar o consumo com alicate amperímetro nos cabos das retificadoras, medir as fases R, S, T no QTM com alicate amperímetro (tirar foto do display apagado também)
+                    </Text>
+                </View>
             }
             <List.Section>
 
@@ -169,45 +172,65 @@ export default props => {
                     />
                 </List.Accordion>
             </List.Section>
-            <View style={{ flexDirection: 'row', justifyContent:'space-around' }}>
-  
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+
 
                 <Button
                     color='#2196f3'
                     contentStyle={{
-                        borderBottomColor:'#2196f3',
-                        borderBottomWidth:listType === 'vistoria'?2:0
+                        borderBottomColor: '#2196f3',
+                        borderBottomWidth: listType === 'vistoria' ? 2 : 0
                     }}
-                    onPress={()=>handleListTypePress('vistoria')}
-              
-                    >
+                    onPress={() => handleListTypePress('vistoria')}
+
+                >
                     VISTORIA
                 </Button>
                 <Button
                     color='#2196f3'
                     contentStyle={{
-                        borderBottomColor:'#2196f3',
-                        borderBottomWidth:listType==='outdoor'?2:0
+                        borderBottomColor: '#2196f3',
+                        borderBottomWidth: listType === 'outdoor' ? 2 : 0
                     }}
-                    onPress={()=>handleListTypePress('outdoor')}
-                  
-                    
-                   >
+                    onPress={() => handleListTypePress('outdoor')}
+
+
+                >
                     OUTDOOR
                 </Button>
+                {/* <Button
+                    color='#2196f3'
+                    contentStyle={{
+                        borderBottomColor: '#2196f3',
+                        borderBottomWidth: listType === 'croqui' ? 2 : 0
+                    }}
+                    onPress={() => handleListTypePress('croqui')}
+                >
+                    CROQUI
+                </Button> */}
                 <Button
                     color='#2196f3'
                     contentStyle={{
-                        borderBottomColor:'#2196f3',
-                        borderBottomWidth:listType === 'qtm'?2:0
+                        borderBottomColor: '#2196f3',
+                        borderBottomWidth: listType === 'qtm' ? 2 : 0
                     }}
-                    onPress={()=>handleListTypePress('qtm')}
-                   >
+                    onPress={() => handleListTypePress('qtm')}
+                >
                     QTM
                 </Button>
             </View>
 
-
+            {/* <Button
+                color='#2196f3'
+                mode="contained"
+                contentStyle={{
+                    borderBottomColor: '#2196f3',
+                    borderBottomWidth: listType === 'qtm' ? 2 : 0
+                }}
+                onPress={() => navigation.navigate("Croqui")}
+            >
+               CRIAR UM CROQUI
+            </Button> */}
             <FlatList
                 data={state[listType]}
                 style={{ flexGrow: 1 }}
@@ -222,7 +245,6 @@ export default props => {
             />
 
 
-
         </View>
 
     )
@@ -230,10 +252,10 @@ export default props => {
 
 const styles = StyleSheet.create({
     container: {
-        //flex:1,
+        flex: 1,
         //alignItems: 'center',
         //justifyContent: 'center',
-        width: '100%',
+        //width: '100%',
 
         //backgroundColor: '#696969',
         //marginVertical:10  

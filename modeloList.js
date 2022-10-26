@@ -2,267 +2,275 @@ import uuid from 'react-native-uuid'
 
 export const AMPLIACAO = [
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 01 - VISTA GERAL DO SITE"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 02 - IDENTIFICAÇÃO DO SITE"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 03 - VISTA GERAL DO GABINETE FECHADO"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 04- VISTA DO GABINETE/RACK ABERTO"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 05 - VISTA FRONTAL DO ROUTER"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 06 - VISTA FRONTAL DO ROUTER COM PAINÉIS"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 07 - IDENTIFICAÇÃO DO ROUTER (HOSTNAME)"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 08 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_1"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 09 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_2"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 10 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_3"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 11 - Nº SÉRIE/MDA(s) / SFP(s) AMPLIADA(s)_1"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 12 - Nº SÉRIE/MDA(s) / SFP(s) AMPLIADA(s)_2"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 13 - IDENTIFICAÇÃO DAS F.Os NO DIO_1"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 14 - IDENTIFICAÇÃO DAS F.Os NO DIO_2"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 15 - IDENTIFICAÇÃO DAS F.Os NO DIO_3"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 16 – TÉCNICO COM CRACHÁ"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 17 – TÉCNICO COM PULSEIRA ANTIESTÁTICA"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 18 – LIMPEZA E ORGANIZAÇÃO  _1"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 19 – LIMPEZA E ORGANIZAÇÃO _2"
+  }, 
+  {
+    id:uuid.v4(),
+    title: " FOTO 20 – PROTEÇÃO PORTA ROTEADOR (SOBRAS)"
   },
   {
-    id: Math.random() * 100,
+    id:uuid.v4(),
     title: "N/A"
   },
-  {
-    id: Math.random() * 100,
-    title: "N/A"
-  }
 ]
 
 export const MIGRACAO = [
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 01 - VISTA GERAL DO SITE"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 02 - IDENTIFICAÇÃO DO SITE"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 03 - VISTA GERAL DO GABINETE FECHADO"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 04- VISTA DO GABINETE/RACK ABERTO"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 05 - VISTA FRONTAL DO ROUTER"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 06 - VISTA FRONTAL DO ROUTER COM PAINÉIS"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 07 - IDENTIFICAÇÃO DO ROUTER (HOSTNAME)"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 08 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_1"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 09 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_2"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 10 - Nº SÉRIE/BP/SGP MDA(s) / SFP(s) AMPLIADA(s)_3"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 11 - Nº SÉRIE/MDA(s) / SFP(s) AMPLIADA(s)_1"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 12 - Nº SÉRIE/MDA(s) / SFP(s) AMPLIADA(s)_2"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 13 - IDENTIFICAÇÃO DAS F.Os NO DIO_1"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 14 - IDENTIFICAÇÃO DAS F.Os NO DIO_2"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 15 - IDENTIFICAÇÃO DAS F.Os NO DIO_3"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 16 – TÉCNICO COM CRACHÁ"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 17 – TÉCNICO COM PULSEIRA ANTIESTÁTICA"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 18 – LIMPEZA E ORGANIZAÇÃO  _1"
   },
   {
-    id: Math.random() * 100,
+    id: uuid.v4(),
     title: "FOTO 19 – LIMPEZA E ORGANIZAÇÃO _2"
+  },  
+  {
+    id:uuid.v4(),
+    title: " FOTO 20 – PROTEÇÃO PORTA ROTEADOR (SOBRAS)"
   },
   {
-    id: Math.random() * 100,
+    id:uuid.v4(),
     title: "N/A"
   },
-  {
-    id: Math.random() * 100,
-    title: "N/A"
-  }
 ]
 
 export const VISTORIA = [
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 01 - IDENTIFICAÇÃO DO SITE"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 02 - PANORÂMICA EXTERNA DO SITE"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 03 - PANORÂMICA INTERNA DO SITE"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 04 - BAYFACE DO RACK/BASTIDOR ABERTO(INTEIRO)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 05 -BAYFACE DO RACK/BASTIDOR ABERTO(PARTE DE CIMA)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 06 - BAYFACE DO RACK/BASTIDOR ABERTO(PARTE DO MEIO)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 07 -  BAYFACE DO RACK/BASTIDOR ABERTO(PARTE DE BAIXO)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 08 - LOCAL DE RESERVA PARA NOVO EQUIPAMENTO COM ARÉA DEMARCADA"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 09 - EQUIPAMENTO QUE SERÁ SUBSTITUÍDO (SWAP)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 10 -  IDENTIFICAÇÃO(HOSTNAME) DO EQUIPAMENTO QUE SERÁ SUBSTITUÍDO (SWAP)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 11 -  CONEXÕES(ÓPTICA/LAN) DO EQUIPAMENTO QUE SERÁ SUBSTITUÍDO (SWAP)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 12 - QDCC/PDU - RESERVA DISJUNTORES : \"INFORME AQUI AS POSIÇÕES E AMPERAGEM\""
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 13 - CONSUMO  TOTAL FONTE - VISOR CONTROLADORA OU AMPERÍMETRO EM CC."
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 14 - PANORÂMICA FONTE(RETIFICADORES + CONTROLADORA)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 15 - DISTRIBUIDOR INTERNO OPTICO (DIO)"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 16 - ATERRAMENTO"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 17 - BANCO DE BATERIAS"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 18 - ETIQUETA DO FABRICANTE COM DADOS (amperagem e voltagem) da BATERIA"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 19 - VISTA GERAL OUTRA OPÇÃO POSSÍVEL DE INSTALAÇÃO"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 20 - VISTA OUTRA OPÇÃO POSSÍVEL DE INSTALAÇÃO"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 21 - VISTA OUTRA OPÇÃO POSSÍVEL DE INSTALAÇÃO"
   },
   {
-    "id": Math.random() * 100,
+    "id": uuid.v4(),
     "title": "FOTO 22 - PANORÂMICA BASTIDORES ABERTOS"
-  }
+  },
+  {
+    "id":uuid.v4(),
+    "title": "FOTO 23 - CROQUI"
+  },
+  {
+    "id":uuid.v4(),
+    "title": "FOTO 24 - CROQUI"
+  },
 ]
 
 export const OUTDOOR = [
@@ -603,11 +611,26 @@ export default [
   },
   {
     id:uuid.v4(),
-    title: "FOTO 65 – LIMPEZA E ORGANIZAÇÃO  _1"
+    title: "FOTO 65 – LIMPEZA E ORGANIZAÇÃO_1"
   },
   {
     id:uuid.v4(),
     title: "FOTO 66 – LIMPEZA E ORGANIZAÇÃO _2"
   },
+  {
+    id:uuid.v4(),
+    title: "FOTO 67 – PROTEÇÃO PORTA ROTEADOR (SOBRAS)"
+  },
+  {
+    id:uuid.v4(),
+    title: "N/A"
+  },
+  {
+    id:uuid.v4(),
+    title: "N/A"
+  },
+ 
+			
+			
 ]
 

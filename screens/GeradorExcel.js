@@ -121,27 +121,31 @@ export default props => {
       //Relatório_Fotográfico_7705 SAR-X_CEAER13-RMP01_(Ampliação)_Rev.0
       const fileName = `${route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'}${route.params.equipName}_${name.toUpperCase()}_(${route.params.type})`
       const fileUri = FileSystem.cacheDirectory + fileName + '_Rev.0.xlsx'
+      try {
+        wb.xlsx.writeBuffer().then((buffer) => {
 
-      wb.xlsx.writeBuffer().then((buffer) => {
+          // Do this to use base64 encoding
+          const nodeBuffer = NodeBuffer.from(buffer)
+          const bufferStr = nodeBuffer.toString('base64')
 
-        // Do this to use base64 encoding
-        const nodeBuffer = NodeBuffer.from(buffer)
-        const bufferStr = nodeBuffer.toString('base64')
+          //gravando arquivo
+          FileSystem.writeAsStringAsync(fileUri, bufferStr, {
+            encoding: FileSystem.EncodingType.Base64
+          }).then(async () => {
+            setExcel(fileUri)
+            setB64Excel(buffer)
 
-        //gravando arquivo
-        FileSystem.writeAsStringAsync(fileUri, bufferStr, {
-          encoding: FileSystem.EncodingType.Base64
-        }).then(async () => {
-          setExcel(fileUri)
-          setB64Excel(buffer)
-
-          Toast.show({
-            type: 'success',
-            text1: 'Gerado com sucesso'
+            Toast.show({
+              type: 'success',
+              text1: 'Gerado com sucesso'
+            })
+            resolve(true)
           })
-          resolve(true)
         })
-      })
+      } catch (error) {
+        alert('ERRO AO TENTAR SALVAR', error)
+        setProgress(false)
+      }
     })
   }
 
@@ -451,11 +455,12 @@ export default props => {
   }
 
   //PEGA AS IMAGENS E DEIXA SO O CODIGO BASE6
-  const getAllImage = () => {
+  const getAllImage = (list= null) => {
 
     const listType = route.params.inventario ? 'imgMain' : 'img'
     let newList = []
-    listFotos.forEach((file, index) => {
+    console.log("get all images", list.length)
+    list.forEach((file, index) => {
 
 
       if (file[listType]) {
@@ -708,14 +713,15 @@ export default props => {
 
   }
 
-  const zipFiles = async () => {
+  const zipFiles = async (list = null) => {
 
     return new Promise(async (resolve, reject) => {
       try {
         const typeDoc = route.params.inventario ? 'Planilha Padrão de Inventário_' : 'Relatório_Fotográfico_'
         const name = `${typeDoc}_${route.params.equipName}_${route.params.title.toUpperCase()}_(${route.params.type})_Rev.0`
         let fileUri = FileSystem.cacheDirectory + name + '.zip'
-        const imgs = getAllImage()
+        const imgs = getAllImage(list)
+        console.log(imgs.length)
         const nodeBuffer = NodeBuffer.from(b64Excel)
         const bufferStr = nodeBuffer.toString('base64')
 
@@ -786,12 +792,17 @@ export default props => {
   const shareExcel = async () => {
     //const shareableExcelUri = await generateExcel();
     setProgress(true)
-    let allFotos = []
-    allFotos = state['vistoria'].concat(state['outdoor'], state['qtm'])
-    setListFotos(allFotos)
+    let allFotos = listFotos
+
+    if(route.params.type == 'Vistória'){
+      allFotos = [...state['vistoria'],...state['outdoor'], ...state['qtm']]
+      console.log('SHAREEXCEL - ', allFotos.length)
+      setListFotos(allFotos)
+    }
+
 
     setTimeout(async () => {
-      const file = await zipFiles()
+      const file = await zipFiles(allFotos)
       if (file) {
         setProgress(false)
         Sharing.shareAsync(file)
@@ -949,7 +960,7 @@ export default props => {
           //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
           let quemEmaior = (item.img.height > item.img.width) ? true : false
 
-          do {
+         // do {
             if (infinit === 100) return alert('LOOP INFINITO')
             if (quemEmaior) {
               newWidth = item.img.width * porcentH
@@ -959,8 +970,8 @@ export default props => {
             else {
               newHeight = item.img.height * porcentW
             }
-            quemEmaior = (height > width) ? true : false
-          } while (newHeight > height || newWidth > width)
+          //  quemEmaior = (height > width) ? true : false
+         // } while (newHeight > height || newWidth > width)
           //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
 
 
@@ -1018,26 +1029,27 @@ export default props => {
     })
 
     ws.getCell('X1').value = ' '
-    for (let i = 5; i <= 185; i++) {
+    for (let i = 5; i <= 201; i++) {
       if (i != 70 && i != 136) {
         ws.getCell('W' + i).border = {
           right: { style: 'thin', color: { argb: '000000' } }
         }
       }
     }
-    columns.forEach(letter => {
-      if (letter === 'W') {
-        ws.getCell('W' + 186).border = {
-          bottom: { style: 'thin', color: { argb: '000000' } },
-          right: { style: 'thin', color: { argb: '000000' } }
-        }
-      } else {
-        ws.getCell(letter + 186).border = {
-          bottom: { style: 'thin', color: { argb: '000000' } },
-        }
-      }
+    // AO ADICIONAR O CROQUI NÃO PRECISA MAIS
+    // columns.forEach(letter => {
+    //   if (letter === 'W') {
+    //     ws.getCell('W' + 186).border = {
+    //       bottom: { style: 'thin', color: { argb: '000000' } },
+    //       right: { style: 'thin', color: { argb: '000000' } }
+    //     }
+    //   } else {
+    //     ws.getCell(letter + 186).border = {
+    //       bottom: { style: 'thin', color: { argb: '000000' } },
+    //     }
+    //   }
 
-    })
+    // })
     ws.pageSetup.printArea = 'A1:X187'
   }
 
@@ -1058,8 +1070,6 @@ export default props => {
 
   const addItemDefault = async (wb, ws, list) => {
     try {
-
-
       let controle = 1
       let column = {
         1: ['B', 'E'],
@@ -1098,17 +1108,17 @@ export default props => {
           //VERIFICA SE A ALTURA É MAIOR QUE A LARGURA
           let quemEmaior = (item.img.height > item.img.width) ? true : false
 
-          do {
-            if (quemEmaior) {
-              newWidth = item.img.width * porcentH
 
-            }
-            //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
-            else {
-              newHeight = item.img.height * porcentW
-            }
-            quemEmaior = (height > width) ? true : false
-          } while (newHeight > height || newWidth > width)
+          if (quemEmaior) {
+            newWidth = item.img.width * porcentH
+
+          }
+          //SE NÃO REDUZ A ALTURA PROPORCIONAL A REDUÇÃO DA LARGURA
+          else {
+            newHeight = item.img.height * porcentW
+          }
+
+
           //SE FOR MAIOR REDUZ A LARGURA PROPORCIONAL A REDUÇÃODA ALTURA
 
 
@@ -1163,7 +1173,7 @@ export default props => {
       const wsQTM = creatWorksheet(wb, 'QTM', 'landscape')
 
       wsVistoria.properties.defaultColWidth = 4
-      wsVistoria.properties.defaultRowHeight = 13
+      //wsVistoria.properties.defaultRowHeight = 13
       creatHeardVistoria(wb, wsVistoria)
       addItemVistoria(wb, wsVistoria)
 

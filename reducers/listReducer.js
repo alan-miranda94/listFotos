@@ -12,9 +12,10 @@ export const initialState = {
   modelo: modelo,
   galeria: [],
   title: 'FOTOS',
-  branco: [],
+  blank: [],
   nameStation: '',
-  inventario:[]
+  inventario:[],
+  croqui:[],
 }
 
 export const ListReducer = (state, action) => {
@@ -47,10 +48,11 @@ export const ListReducer = (state, action) => {
 
     //COLOCA OS DADOS DA LISTA SELECIONADO COM A LISTA ATUAL
     case 'novoItem':
-      let newList = [...state.branco, action.payload.item]
+      
+      let newList = [...state[action.payload.list], action.payload.item]
       return {
         ...state,
-        branco: newList
+        [action.payload.list]: newList
       }
     
     case 'addInventario':
